@@ -1,18 +1,16 @@
 import './Chessboard.css';
 import Square from './Square';
 import { ChessBoardModel } from '../../../../model/ChessBoardModel';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE } from '../../../../Constants';
-
+import React from 'react';
 export default function Chessboard(props:{playerColor:string}){
     const playerColor = props.playerColor;
-    const boardRef = useRef<HTMLDivElement>(null);
-    let activePiece: HTMLElement | null = null;
-
+    const boardViewRef = useRef<HTMLDivElement>(null);
+    const [activePiece, setActivePiece] = useState< HTMLElement | null>(null);
+    const [grabPiecePos, setGrabPiecePos] = useState<string | null>(null)
     const boardModel = new ChessBoardModel(playerColor).genChessBoard();
     const boardView:any = [[],[],[],[],[],[],[],[]];
-
-    const [chessboard,setChessBoard] = useState(boardModel);
 
     for(let i = 0; i<BOARD_SIZE; i++){
         for(let j = 0; j<BOARD_SIZE; j++){
@@ -21,64 +19,105 @@ export default function Chessboard(props:{playerColor:string}){
             );
         }
     }
-
-    function grabPiece(event: React.MouseEvent){
-        const element = event.target as HTMLElement;
-    
-        if(element.classList.contains("piece")){
-            const x = event.clientX-50;
-            const y = event.clientY-50;
-            element.style.position = "absolute";
-            element.style.left = `${x}px`;
-            element.style.top = `${y}px`;
-            activePiece = element;
-        }
-    }
-    
-    function movePiece(event: React.MouseEvent){
-        if(activePiece && boardRef.current){
-            const minX = boardRef.current.offsetLeft;
-            const minY = boardRef.current.offsetTop;
-            const maxX = boardRef.current.offsetLeft + boardRef.current.clientWidth-75;
-            const maxY = boardRef.current.offsetTop + boardRef.current.clientHeight-75;
-
-            const x = event.clientX-50;
-            const y = event.clientY-50;
-
-            if (x < minX) {
-                activePiece.style.left = `${minX}px`;
-            }
-            else if (x > maxX) {
-                activePiece.style.left = `${maxX}px`;
-            }
-            else {
-                activePiece.style.left = `${x}px`;
-            }
-    
-            if (y < minY) {
-                activePiece.style.top = `${minY}px`;
-            }
-            else if (y > maxY) {
-                activePiece.style.top = `${maxY}px`;
-            }
-            else {
-                activePiece.style.top = `${y}px`;
-            }
-        }
-    }
-    
-    function dropPiece(event: React.MouseEvent){
-
+    function handleClick(event: React.MouseEvent){
+        console.log(activePiece);
         if(activePiece){
-            activePiece = null;
+            movePiece(event);
+        }
+        else{
+            selectPiece(event);
         }
     }
+    function selectPiece(event: React.MouseEvent){
+        const element = event.target as HTMLElement;
+        const currentBoard = boardViewRef.current;
+        if(element.classList.contains("piece") && currentBoard && !activePiece){
+            
+            setActivePiece(element); 
+        }       
+    }
+    function movePiece(event: React.MouseEvent){
+        const element = event.target as HTMLElement;
+        if(activePiece && boardViewRef.current){
+            let startSquare = activePiece.parentElement;
+            let endSquare: HTMLElement | null = element;
+            
+            if(element.classList.contains("piece")){
+                endSquare = endSquare.parentElement;
+            }
+            if(startSquare && endSquare){
+                endSquare.innerHTML = '';
+                if(startSquare.children.length > 0){
+                    startSquare.removeChild(activePiece);
+
+                }
+                endSquare.appendChild(activePiece);
+            }
+            setActivePiece(null);
+        }
+    }
+    // function grabPiece(event: React.MouseEvent){
+    //     const element = event.target as HTMLElement;
+    //     const currentBoard = boardViewRef.current;
+    //     setGrabPiecePos(element.parentElement?.id+"");
+    //     console.log(element.parentElement?.id);
+    //     if(element.classList.contains("piece") && currentBoard){
+    //         const BOARD_VIEW_HEIGHT = boardViewRef.current.clientHeight;
+    //         const BOARD_VIEW_WIDTH = boardViewRef.current.clientWidth;
+    //         const x = event.clientX-(BOARD_VIEW_WIDTH/16);
+    //         const y = event.clientY-(BOARD_VIEW_HEIGHT/16);
+    //         element.style.position = "absolute";
+    //         element.style.left = `${x}px`;
+    //         element.style.top = `${y}px`;
+    //         setActivePiece(element);
+    //     }
+    // }
+    
+    // function movePiece(event: React.MouseEvent){
+    //     if(activePiece && boardViewRef.current){
+    //         const BOARD_VIEW_HEIGHT = boardViewRef.current.clientHeight;
+    //         const BOARD_VIEW_WIDTH = boardViewRef.current.clientHeight;
+    //         const minX = boardViewRef.current.offsetLeft;
+    //         const minY = boardViewRef.current.offsetTop;
+    //         const maxX = boardViewRef.current.offsetLeft + ((8/9)*BOARD_VIEW_WIDTH);
+    //         const maxY = boardViewRef.current.offsetTop + ((8/9)*BOARD_VIEW_HEIGHT);
+
+    //         const x = event.clientX-(BOARD_VIEW_WIDTH/16);
+    //         const y = event.clientY-(BOARD_VIEW_HEIGHT/16);
+
+    //         if (x < minX) {
+    //             activePiece.style.left = `${minX}px`;
+    //         }
+    //         else if (x > maxX) {
+    //             activePiece.style.left = `${maxX}px`;
+    //         }
+    //         else {
+    //             activePiece.style.left = `${x}px`;
+    //         }
+    
+    //         if (y < minY) {
+    //             activePiece.style.top = `${minY}px`;
+    //         }
+    //         else if (y > maxY) {
+    //             activePiece.style.top = `${maxY}px`;
+    //         }
+    //         else {
+    //             activePiece.style.top = `${y}px`;
+    //         }
+    //     }
+    // }
+    
+    // function dropPiece(event: React.MouseEvent){
+    //     const element = event.target as HTMLElement;
+    //     console.log(event);
+    //     if(activePiece && boardViewRef.current){
+    //         setActivePiece(null);
+    //     }
+    // }
     return(
         <div id = "chessboard"
-        onMouseMove={event => movePiece(event)}   
-        onMouseDown={event => grabPiece(event)}
-        onMouseUp={event => dropPiece(event)}
-        ref={boardRef}>
+        onClick={event=>handleClick(event)}
+        ref={boardViewRef}>
             {boardView}
         </div>
     );
