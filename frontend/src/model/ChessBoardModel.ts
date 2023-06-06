@@ -40,43 +40,43 @@ export class ChessBoardModel{
     }
     private genPiece(col:string,row:number): PieceModel | undefined{
         if(row == 2){
-            return new PieceModel("Pawn","White");
+            return new PieceModel(PieceType.PAWN,"White");
         }
         else if(row == 7){
-            return new PieceModel("Pawn","Black");
+            return new PieceModel(PieceType.PAWN,"Black");
         }
         else if(row == 1){
             if(col == 'a' || col == 'h'){
-                return new PieceModel("Rook","White");
+                return new PieceModel(PieceType.ROOK,"White");
             }
             else if(col== 'b' || col == 'g'){
-                return new PieceModel("Knight", "White");
+                return new PieceModel(PieceType.KNIGHT, "White");
             }
             else if(col== 'c' || col == 'f'){
-                return new PieceModel("Bishop", "White");
+                return new PieceModel(PieceType.BISHOP, "White");
             }
             else if(col == 'd'){
-                return new PieceModel("Queen", "White");
+                return new PieceModel(PieceType.QUEEN, "White");
             }
             else{
-                return new PieceModel("King", "White");
+                return new PieceModel(PieceType.KING, "White");
             }
         }
         else if(row == 8){
             if(col == 'a' || col == 'h'){
-                return new PieceModel("Rook","Black");
+                return new PieceModel(PieceType.ROOK,"Black");
             }
             else if(col== 'b' || col == 'g'){
-                return new PieceModel("Knight", "Black");
+                return new PieceModel(PieceType.KNIGHT, "Black");
             }
             else if(col== 'c' || col == 'f'){
-                return new PieceModel("Bishop", "Black");
+                return new PieceModel(PieceType.BISHOP, "Black");
             }
             else if(col == 'd'){
-                return new PieceModel("Queen", "Black");
+                return new PieceModel(PieceType.QUEEN, "Black");
             }
             else{
-                return new PieceModel("King", "Black");
+                return new PieceModel(PieceType.KING, "Black");
             }
         }
         else{

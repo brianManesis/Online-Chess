@@ -18,8 +18,17 @@
 .BlackSquare{
     background-color: rgb(30, 96, 30);
 }
-img{
+.piece{
     height: 8vh;
     width:8vh;
-    image-rendering: auto;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 8vh;
+}
+.piece:hover{
+    cursor: grab;
+}
+
+.piece:active {
+    cursor: grabbing;
 }
