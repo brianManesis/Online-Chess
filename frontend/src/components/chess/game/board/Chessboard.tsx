@@ -2,15 +2,16 @@ import './Chessboard.css';
 import Square from './Square';
 import { ChessBoardModel } from '../../../../model/ChessBoardModel';
 import { useEffect, useRef, useState } from 'react';
-import { BOARD_SIZE } from '../../../../Constants';
+import { BOARD_SIZE, PlayerColor } from '../../../../Constants';
 import React from 'react';
+import { possiblePawnMoves } from '../../../../model/PossibleMoves';
 export default function Chessboard(props:{playerColor:string}){
     const playerColor = props.playerColor;
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [activePiece, setActivePiece] = useState< HTMLElement | null>(null);
-    const [grabPiecePos, setGrabPiecePos] = useState<string | null>(null)
     const boardModel = new ChessBoardModel(playerColor).genChessBoard();
     const boardView:any = [[],[],[],[],[],[],[],[]];
+    console.log(possiblePawnMoves(boardModel[7][7],playerColor));
 
     for(let i = 0; i<BOARD_SIZE; i++){
         for(let j = 0; j<BOARD_SIZE; j++){
@@ -20,7 +21,7 @@ export default function Chessboard(props:{playerColor:string}){
         }
     }
     function handleClick(event: React.MouseEvent){
-        console.log(activePiece);
+        //console.log(activePiece);
         if(activePiece){
             movePiece(event);
         }
@@ -29,24 +30,40 @@ export default function Chessboard(props:{playerColor:string}){
         }
     }
     function selectPiece(event: React.MouseEvent){
+        console.log(event.target); 
         const element = event.target as HTMLElement;
         const currentBoard = boardViewRef.current;
         if(element.classList.contains("piece") && currentBoard && !activePiece){
-            
             setActivePiece(element); 
         }       
     }
     function movePiece(event: React.MouseEvent){
+        console.log(event.target);
         const element = event.target as HTMLElement;
         if(activePiece && boardViewRef.current){
             let startSquare = activePiece.parentElement;
             let endSquare: HTMLElement | null = element;
-            
+            let activePieceID = activePiece.id;
+            let activePieceColor:string = activePieceID.includes("White")?
+                PlayerColor.WHITE:PlayerColor.BLACK;
+
             if(element.classList.contains("piece")){
+                // Need to fix selectPiece for when endSquare has piece
+                // of the same color as activePiece
+                // and also cant capture piece of the same color
+                // let endPieceColor = endSquare.id.includes("White")?
+                // PlayerColor.WHITE:PlayerColor.BLACK;
+
+                // if(endPieceColor == activePieceColor){
+                //     selectPiece(event);
+                //     return;
+                // }
                 endSquare = endSquare.parentElement;
             }
             if(startSquare && endSquare){
-                endSquare.innerHTML = '';
+                if(endSquare.children.length > 0){
+                    endSquare.innerHTML = '';
+                }
                 if(startSquare.children.length > 0){
                     startSquare.removeChild(activePiece);
 

@@ -25,10 +25,10 @@
     background-position: center;
     background-size: 8vh;
 }
-.piece:hover{
+/* .piece:hover{
     cursor: grab;
 }
 
 .piece:active {
     cursor: grabbing;
-}
+} */

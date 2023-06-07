@@ -3,7 +3,7 @@ import { PieceModel } from "./PieceModel";
 export class SquareModel{
     private color:string;
     private pos:string;
-    private piece?:PieceModel;
+    private piece:PieceModel | undefined;
 
     public constructor(color:string,pos:string,piece?:PieceModel){
         this.color = color;
@@ -18,5 +18,8 @@ export class SquareModel{
     }
     public getPos():string{
         return this.pos;
+    }
+    public setPiece(piece:PieceModel | undefined){
+        this.piece = piece;
     }
 }
