@@ -4,13 +4,13 @@ export class PieceModel{
     protected type:PieceType;
     protected color:string;
     public imageURI:string;
-    public HAS_MOVED:boolean;
+    public beenMoved:boolean;
 
     public constructor(type: PieceType, color: string){
         this.type = type;
         this.color = color;
         this.imageURI = `/assets/images/${color+type}.png`;
-        this.HAS_MOVED = false;
+        this.beenMoved = false;
     }
     public getType(): string{
         return this.type;

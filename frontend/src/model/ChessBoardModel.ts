@@ -35,7 +35,7 @@ export class ChessBoardModel{
         }
     }
 
-    public genChessBoard():Array<Array<SquareModel>>{
+    public getChessBoard():Array<Array<SquareModel>>{
         return this.chessBoard;
     }
     private genPiece(col:string,row:number): PieceModel | undefined{
