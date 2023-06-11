@@ -3,8 +3,9 @@ import { SquareModel } from "./SquareModel";
 import { ROW_VALUES, COL_VALUES, PlayerColor, PieceType, BOARD_SIZE} from "../Constants";
 
 export class ChessBoardModel{
-    private chessBoard: Array<Array<SquareModel>>;
+    public chessBoard: Array<Array<SquareModel>>;
     private playerColor:string;
+    private posMap:Map<string,{i:number,j:number}> = new Map();
 
     public constructor(playerColor:string){
         this.playerColor = playerColor;
@@ -19,6 +20,7 @@ export class ChessBoardModel{
             for(let j = 0; j< BOARD_SIZE; j++){
 
                 let pos:string = col[j]+row[i];
+                this.posMap.set(pos,{i:i, j:j});
                 let color = (j+i+2) % 2 == 0? PlayerColor.WHITE:PlayerColor.BLACK
                 let piece:PieceModel | undefined = this.genPiece(col[j],row[i]);
                 
@@ -37,6 +39,21 @@ export class ChessBoardModel{
 
     public getChessBoard():Array<Array<SquareModel>>{
         return this.chessBoard;
+    }
+    public getPosMap():Map<string,{i:number,j:number}>{
+        return this.posMap;
+    }
+    public pieceMove(fromSquare:SquareModel, toSquare:SquareModel){
+        if(fromSquare && toSquare){
+            let pieceOnFromSquare: PieceModel | undefined = fromSquare.getPiece();
+            if(pieceOnFromSquare){
+                fromSquare.setPiece(undefined);
+                toSquare.setPiece(pieceOnFromSquare);
+            }
+        }
+    }
+    public posToArrayPos(pos: string){
+        return this.posMap.get(pos);
     }
     private genPiece(col:string,row:number): PieceModel | undefined{
         if(row == 2){
@@ -82,5 +99,24 @@ export class ChessBoardModel{
         else{
             return undefined;
         }
+    }
+
+    public clone():ChessBoardModel{
+        const clone = new ChessBoardModel(this.playerColor);
+
+        clone.chessBoard = this.chessBoard.map((row) =>
+            row.map((square) => {
+            const clonedSquare = new SquareModel(square.getColor(), square.getPos());
+            const piece = square.getPiece();
+            if (piece) {
+                const clonedPiece = new PieceModel(piece.getType(), piece.getColor());
+                clonedSquare.setPiece(clonedPiece);
+            }
+            return clonedSquare;
+            })
+        );
+
+        clone.posMap = new Map(this.posMap);
+        return clone;
     }
 }

@@ -5,21 +5,32 @@ import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE, PlayerColor } from '../../../../Constants';
 import React from 'react';
 import { possiblePawnMoves } from '../../../../model/PossibleMoves';
+
 export default function Chessboard(props:{playerColor:string}){
     const playerColor = props.playerColor;
     const chessBoard:ChessBoardModel = new ChessBoardModel(playerColor);
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [activePiece, setActivePiece] = useState< HTMLElement | null>(null);
-    const [boardModel,setBoardModel] = useState(chessBoard.getChessBoard());
-    const boardView:any = [[],[],[],[],[],[],[],[]];
+    const [boardModel,setBoardModel] = useState(chessBoard);
+    const [boardView, setBoardView] = useState([[],[],[],[],[],[],[],[]]);
+        
+    useEffect(()=>{
+        makeChessBoard();
+        console.log(boardModel);
+        console.log(boardView);
+    },[boardModel]);
 
+    function makeChessBoard(){
+        const boardViewTemp:any = [[],[],[],[],[],[],[],[]];
         for(let i = 0; i<BOARD_SIZE; i++){
             for(let j = 0; j<BOARD_SIZE; j++){
-                boardView[i].push(
-                    <Square key={i+""+j} squareModel={boardModel[i][j]}></Square>
+                boardViewTemp[i].push(
+                    <Square key={i+""+j} squareModel={boardModel.getChessBoard()[i][j]}></Square>
                 );
             }
         }
+        setBoardView(() => boardViewTemp);
+    }
     function handleClick(event: React.MouseEvent){
         if(activePiece){
             movePiece(event);
@@ -38,7 +49,6 @@ export default function Chessboard(props:{playerColor:string}){
     function movePiece(event: React.MouseEvent){
         const element = event.target as HTMLElement;
         if(activePiece && boardViewRef.current){
-            //need to update model
             let startSquare = activePiece.parentElement;
             let endSquare: HTMLElement | null = element;
             let activePieceColor:string = activePiece.id.includes("White")?
@@ -57,14 +67,17 @@ export default function Chessboard(props:{playerColor:string}){
 
 
             if(startSquare && endSquare){
-                if(endSquare.children.length > 0){
-                    endSquare.innerHTML = '';
+                const updatedBoardModel = boardModel.clone();
+                const updatedBoard = updatedBoardModel.getChessBoard();
+                let startPos = updatedBoardModel.posToArrayPos(startSquare.id);
+                let endPos = updatedBoardModel.posToArrayPos(endSquare.id);
+                if(startPos && endPos){
+                    updatedBoardModel.pieceMove(
+                        updatedBoard[startPos.i][startPos.j],
+                        updatedBoard[endPos.i][endPos.j]
+                    );
                 }
-                if(startSquare.children.length > 0){
-                    startSquare.removeChild(activePiece);
-
-                }
-                endSquare.appendChild(activePiece);
+                 setBoardModel(updatedBoardModel);
             }
             setActivePiece(null);
         }

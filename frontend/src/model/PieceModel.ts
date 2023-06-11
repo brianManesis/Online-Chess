@@ -12,7 +12,7 @@ export class PieceModel{
         this.imageURI = `/assets/images/${color+type}.png`;
         this.beenMoved = false;
     }
-    public getType(): string{
+    public getType(): PieceType{
         return this.type;
     }
     public getColor(): string{
