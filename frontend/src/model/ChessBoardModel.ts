@@ -1,19 +1,20 @@
 import { PieceModel } from "./PieceModel";
 import { SquareModel } from "./SquareModel";
 import { ROW_VALUES, COL_VALUES, PlayerColor, PieceType, BOARD_SIZE} from "../Constants";
+import { possiblePawnMoves } from "./PossibleMoves";
 
 export class ChessBoardModel{
     public chessBoard: Array<Array<SquareModel>>;
-    private playerColor:string;
+    private playerColor:PlayerColor;
     private posMap:Map<string,{i:number,j:number}> = new Map();
 
-    public constructor(playerColor:string){
+    public constructor(playerColor:PlayerColor){
         this.playerColor = playerColor;
-        let col = playerColor =="White"?
-        ROW_VALUES:[...ROW_VALUES].reverse();
+        let col = //playerColor =="White"?
+        ROW_VALUES;//:[...ROW_VALUES].reverse();
 
-        let row = playerColor == "White"?
-        [...COL_VALUES].reverse():COL_VALUES;
+        let row = //playerColor == "White"?
+        [...COL_VALUES].reverse();//:COL_VALUES;
        
         this.chessBoard = [[],[],[],[],[],[],[],[]];
         for(let i = 0; i< BOARD_SIZE; i++){
@@ -55,45 +56,50 @@ export class ChessBoardModel{
     public posToArrayPos(pos: string){
         return this.posMap.get(pos);
     }
+    public validPawnMove(square:SquareModel, playerColor:PlayerColor){
+        const pos = square.getPos();
+
+        return possiblePawnMoves(this,square,playerColor).has(pos);
+    }
     private genPiece(col:string,row:number): PieceModel | undefined{
         if(row == 2){
-            return new PieceModel(PieceType.PAWN,"White");
+            return new PieceModel(PieceType.PAWN,PlayerColor.WHITE);
         }
         else if(row == 7){
-            return new PieceModel(PieceType.PAWN,"Black");
+            return new PieceModel(PieceType.PAWN,PlayerColor.BLACK);
         }
         else if(row == 1){
             if(col == 'a' || col == 'h'){
-                return new PieceModel(PieceType.ROOK,"White");
+                return new PieceModel(PieceType.ROOK,PlayerColor.WHITE);
             }
             else if(col== 'b' || col == 'g'){
-                return new PieceModel(PieceType.KNIGHT, "White");
+                return new PieceModel(PieceType.KNIGHT, PlayerColor.WHITE);
             }
             else if(col== 'c' || col == 'f'){
-                return new PieceModel(PieceType.BISHOP, "White");
+                return new PieceModel(PieceType.BISHOP, PlayerColor.WHITE);
             }
             else if(col == 'd'){
-                return new PieceModel(PieceType.QUEEN, "White");
+                return new PieceModel(PieceType.QUEEN, PlayerColor.WHITE);
             }
             else{
-                return new PieceModel(PieceType.KING, "White");
+                return new PieceModel(PieceType.KING, PlayerColor.WHITE);
             }
         }
         else if(row == 8){
             if(col == 'a' || col == 'h'){
-                return new PieceModel(PieceType.ROOK,"Black");
+                return new PieceModel(PieceType.ROOK,PlayerColor.BLACK);
             }
             else if(col== 'b' || col == 'g'){
-                return new PieceModel(PieceType.KNIGHT, "Black");
+                return new PieceModel(PieceType.KNIGHT, PlayerColor.BLACK);
             }
             else if(col== 'c' || col == 'f'){
-                return new PieceModel(PieceType.BISHOP, "Black");
+                return new PieceModel(PieceType.BISHOP, PlayerColor.BLACK);
             }
             else if(col == 'd'){
-                return new PieceModel(PieceType.QUEEN, "Black");
+                return new PieceModel(PieceType.QUEEN, PlayerColor.BLACK);
             }
             else{
-                return new PieceModel(PieceType.KING, "Black");
+                return new PieceModel(PieceType.KING, PlayerColor.BLACK);
             }
         }
         else{

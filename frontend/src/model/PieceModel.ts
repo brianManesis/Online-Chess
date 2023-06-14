@@ -1,12 +1,12 @@
-import { PieceType } from "../Constants";
+import { PieceType, PlayerColor } from "../Constants";
 
 export class PieceModel{
     protected type:PieceType;
-    protected color:string;
+    protected color:PlayerColor;
     public imageURI:string;
     public beenMoved:boolean;
 
-    public constructor(type: PieceType, color: string){
+    public constructor(type: PieceType, color: PlayerColor){
         this.type = type;
         this.color = color;
         this.imageURI = `/assets/images/${color+type}.png`;
@@ -15,7 +15,7 @@ export class PieceModel{
     public getType(): PieceType{
         return this.type;
     }
-    public getColor(): string{
+    public getColor(): PlayerColor{
         return this.color;
     }
 

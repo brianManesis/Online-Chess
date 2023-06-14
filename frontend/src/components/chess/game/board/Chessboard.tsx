@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE, PlayerColor } from '../../../../Constants';
 import React from 'react';
 import { possiblePawnMoves } from '../../../../model/PossibleMoves';
+import { SquareModel } from '../../../../model/SquareModel';
 
-export default function Chessboard(props:{playerColor:string}){
+export default function Chessboard(props:{playerColor:PlayerColor}){
     const playerColor = props.playerColor;
     const chessBoard:ChessBoardModel = new ChessBoardModel(playerColor);
     const boardViewRef = useRef<HTMLDivElement>(null);
@@ -22,11 +23,25 @@ export default function Chessboard(props:{playerColor:string}){
 
     function makeChessBoard(){
         const boardViewTemp:any = [[],[],[],[],[],[],[],[]];
-        for(let i = 0; i<BOARD_SIZE; i++){
-            for(let j = 0; j<BOARD_SIZE; j++){
-                boardViewTemp[i].push(
-                    <Square key={i+""+j} squareModel={boardModel.getChessBoard()[i][j]}></Square>
-                );
+        const currentBoardModel:Array<Array<SquareModel>> = boardModel.getChessBoard();
+        if(playerColor === PlayerColor.WHITE){
+            for(let i = 0; i<BOARD_SIZE; i++){
+                for(let j = 0; j<BOARD_SIZE; j++){
+                    boardViewTemp[i].push(
+                        <Square key={i+""+j} squareModel={currentBoardModel[i][j]}></Square>
+                    );
+                }
+            }
+        }
+        else{
+            for(let i = BOARD_SIZE-1; i>=0; i--){
+                let k = 0;
+                for(let j = BOARD_SIZE-1; j>=0; j--){
+                    boardViewTemp[k].push(
+                        <Square key={i+""+j} squareModel={currentBoardModel[i][j]}></Square>
+                    );
+                }
+                k++;
             }
         }
         setBoardView(() => boardViewTemp);
