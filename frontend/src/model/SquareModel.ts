@@ -1,4 +1,4 @@
-import { PieceModel } from "./PieceModel";
+import { PieceModel } from "./pieces/PieceModel";
 
 export class SquareModel{
     private color:string;

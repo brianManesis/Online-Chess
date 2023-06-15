@@ -1,5 +1,5 @@
-import { PlayerColor } from "../Constants";
-import { PieceModel } from "./PieceModel";
+import { PlayerColor } from "../utils/Constants";
+import { PieceModel } from "./pieces/PieceModel";
 
 export const pawnDirections = (pawn:PieceModel)=>{
     return pawn.getColor() === PlayerColor.WHITE?

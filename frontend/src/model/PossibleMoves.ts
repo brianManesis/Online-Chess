@@ -1,4 +1,4 @@
-import { PlayerColor } from "../Constants";
+import { PlayerColor } from "../utils/Constants";
 import { ChessBoardModel } from "./ChessBoardModel";
 import { SquareModel } from "./SquareModel";
 import { pawnDirections } from "./pieceDirections";

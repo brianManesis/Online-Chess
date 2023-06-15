@@ -2,7 +2,7 @@ import './Chessboard.css';
 import Square from './Square';
 import { ChessBoardModel } from '../../../../model/ChessBoardModel';
 import { useEffect, useRef, useState } from 'react';
-import { BOARD_SIZE, PlayerColor } from '../../../../Constants';
+import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
 import { possiblePawnMoves } from '../../../../model/PossibleMoves';
 import { SquareModel } from '../../../../model/SquareModel';
@@ -66,7 +66,7 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
         if(activePiece && boardViewRef.current){
             let startSquare = activePiece.parentElement;
             let endSquare: HTMLElement | null = element;
-            let activePieceColor:string = activePiece.id.includes("White")?
+            let activePieceColor:PlayerColor = activePiece.id.includes("White")?
                 PlayerColor.WHITE:PlayerColor.BLACK;
 
             if(endSquare.classList.contains("piece")){
@@ -86,11 +86,18 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
                 const updatedBoard = updatedBoardModel.getChessBoard();
                 let startPos = updatedBoardModel.posToArrayPos(startSquare.id);
                 let endPos = updatedBoardModel.posToArrayPos(endSquare.id);
+                console.log(startSquare.id,endSquare.id);
                 if(startPos && endPos){
-                    updatedBoardModel.pieceMove(
+                    let valid = updatedBoardModel.validMove(
                         updatedBoard[startPos.i][startPos.j],
-                        updatedBoard[endPos.i][endPos.j]
-                    );
+                        updatedBoard[endPos.i][endPos.j],
+                        activePieceColor);
+                    if(valid){
+                        updatedBoardModel.pieceMove(
+                            updatedBoard[startPos.i][startPos.j],
+                            updatedBoard[endPos.i][endPos.j]
+                        );
+                    }
                 }
                  setBoardModel(updatedBoardModel);
             }

@@ -1,4 +1,4 @@
-import { PieceModel } from '../../../../model/PieceModel';
+import { PieceModel } from '../../../../model/pieces/PieceModel';
 
 export function Piece(props:{piece:PieceModel}){
     let piece =props.piece;
