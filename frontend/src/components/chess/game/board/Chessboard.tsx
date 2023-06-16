@@ -4,7 +4,6 @@ import { ChessBoardModel } from '../../../../model/ChessBoardModel';
 import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
-import { possiblePawnMoves } from '../../../../model/PossibleMoves';
 import { SquareModel } from '../../../../model/SquareModel';
 
 export default function Chessboard(props:{playerColor:PlayerColor}){

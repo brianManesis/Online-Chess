@@ -7,7 +7,6 @@ export class PawnModel extends PieceModel{
     public constructor(type: PieceType, color: PlayerColor){
         super(type, color);
     }
-
     public validMove(boardModel:ChessBoardModel, startSquare:SquareModel,
                     endSquare:SquareModel, playerColor:PlayerColor): boolean {
         const pos = endSquare.getPos();

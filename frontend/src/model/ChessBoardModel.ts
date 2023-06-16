@@ -12,6 +12,7 @@ export class ChessBoardModel{
     private chessBoard: Array<Array<SquareModel>>;
     private playerColor:PlayerColor;
     private posMap:Map<string,{i:number,j:number}> = new Map();
+   // private opponentCoveredSquarePos:Set<string> = new Set();
 
     public constructor(playerColor:PlayerColor){
         this.playerColor = playerColor;

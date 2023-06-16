@@ -11,25 +11,27 @@ export class RookModel extends PieceModel{
     public validMove(boardModel:ChessBoardModel, startSquare:SquareModel,
         endSquare:SquareModel, playerColor:PlayerColor): boolean {
             const pos = endSquare.getPos();
-            return this.updatePossibleMoves(boardModel,startSquare,playerColor).has(pos);    }
+            return this.updatePossibleMoves(boardModel,startSquare,playerColor).has(pos);
+    }
 
     private updatePossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const rook = square.getPiece();
         const board = boardModel.getChessBoard();
         this.possibleMoves.clear();
 
-        if(rook){
-            const rookDirections = this.rookDirections();
-            const chessNotation = square.getPos();
-            const posArray = boardModel.posToArrayPos(chessNotation);
+        if(!rook) return this.possibleMoves;
 
-            if(posArray){
-                let i = posArray.i;
-                let j = posArray.j; 
-                for(const [key,value] of Object.entries(rookDirections)){
-                    this.checkSquares(board,i,j,value.dx,value.dy,playerColor);
-                }
-            }
+        const rookDirections = this.rookDirections();
+        const chessNotation = square.getPos();
+        const posArray = boardModel.posToArrayPos(chessNotation);
+
+        if(!posArray) return this.possibleMoves;
+
+        let i = posArray.i;
+        let j = posArray.j; 
+        
+        for(const [key,value] of Object.entries(rookDirections)){
+            this.checkSquares(board,i,j,value.dx,value.dy,playerColor);
         }
         console.log(this.possibleMoves)
 
