@@ -34,24 +34,9 @@ export abstract class PieceModel{
         dy:number, playerColor:PlayerColor){
         let flag = true;
         while(flag){
-            let dI:number = i+dy;
-            let dJ:number = j+dx;
-            if(this.withinBoard(dI,dJ)){
-                const tempSquare:SquareModel = board[dI][dJ];
-                if(tempSquare.getPiece() && tempSquare.getPiece()?.getColor() !== playerColor){
-                    this.possibleMoves.add(tempSquare.getPos());
-                    i = dI;
-                    j = dJ;
-                    flag = false;
-                }
-                else if(!tempSquare.getPiece()){
-                    this.possibleMoves.add(tempSquare.getPos());
-                    i = dI;
-                    j = dJ;
-                }
-                else{ flag = false }
-            }
-            else{ flag = false; }
+            flag = this.checkSquare(board,i,j,dx,dy,playerColor);
+            i = i+dy;
+            j = j+dx;
         }
     }
     protected checkSquare(board:Array<Array<SquareModel>>,i:number,j:number,dx:number,
@@ -60,11 +45,12 @@ export abstract class PieceModel{
             let dJ:number = j+dx;
             if(this.withinBoard(dI,dJ)){
                 const tempSquare:SquareModel = board[dI][dJ];
-                if(tempSquare.getPiece() && tempSquare.getPiece()?.getColor() !== playerColor){
+                const tempPiece = tempSquare.getPiece()
+                if(tempPiece && tempPiece.getColor() !== playerColor){
                     this.possibleMoves.add(tempSquare.getPos());
                     return true;
                 }
-                else if(!tempSquare.getPiece()){
+                else if(!tempPiece){
                     this.possibleMoves.add(tempSquare.getPos());
                     return true;
                 }

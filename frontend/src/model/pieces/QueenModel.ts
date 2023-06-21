@@ -21,7 +21,7 @@ export class QueenModel extends PieceModel{
 
         if(!queen) return this.possibleMoves;
 
-        const queenDirections = this.queenDirections();
+        const queenDirections = QueenModel.queenDirections;
         const chessNotation = square.getPos();
         const posArray = boardModel.posToArrayPos(chessNotation);
 
@@ -38,8 +38,7 @@ export class QueenModel extends PieceModel{
         return this.possibleMoves;
     }
 
-    private queenDirections(){
-        return {
+    public static queenDirections ={
             left:{
                 dx:-1,
                 dy:0
@@ -72,6 +71,5 @@ export class QueenModel extends PieceModel{
                 dx:1,
                 dy:1
             }
-        }
     }
 }

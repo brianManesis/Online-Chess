@@ -21,7 +21,7 @@ export class BishopModel extends PieceModel{
 
         if(!rook) return this.possibleMoves;
 
-        const bishopDirections = this.bishopDirections();
+        const bishopDirections = BishopModel.bishopDirections;
         const chessNotation = square.getPos();
         const posArray = boardModel.posToArrayPos(chessNotation);
 
@@ -37,8 +37,7 @@ export class BishopModel extends PieceModel{
         return this.possibleMoves;
     }
 
-    private bishopDirections(){
-        return {
+    private static bishopDirections = {
             leftUp:{
                 dx:-1,
                 dy:-1
@@ -55,6 +54,5 @@ export class BishopModel extends PieceModel{
                 dx:1,
                 dy:1
             }
-        }
     }
 }

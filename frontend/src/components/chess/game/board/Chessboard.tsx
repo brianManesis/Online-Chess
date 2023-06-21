@@ -16,8 +16,8 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
         
     useEffect(()=>{
         makeChessBoard();
-        console.log(boardModel);
-        console.log(boardView);
+        // console.log(boardModel);
+        // console.log(boardView);
     },[boardModel]);
 
     function makeChessBoard(){
@@ -85,7 +85,6 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
                 const updatedBoard = updatedBoardModel.getChessBoard();
                 let startPos = updatedBoardModel.posToArrayPos(startSquare.id);
                 let endPos = updatedBoardModel.posToArrayPos(endSquare.id);
-                console.log(startSquare.id,endSquare.id);
                 if(startPos && endPos){
                     let valid = updatedBoardModel.validMove(
                         updatedBoard[startPos.i][startPos.j],

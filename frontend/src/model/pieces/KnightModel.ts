@@ -21,7 +21,7 @@ export class KnightModel extends PieceModel{
 
         if(!knight) return this.possibleMoves;
 
-        const knightDirections = this.knightDirections();
+        const knightDirections = KnightModel.knightDirections;
         const chessNotation = square.getPos();
         const posArray = boardModel.posToArrayPos(chessNotation);
 
@@ -38,24 +38,22 @@ export class KnightModel extends PieceModel{
         return this.possibleMoves;
     }
 
-    private knightDirections(){
-        return {
-            leftUp:{
-                dx:-2,
-                dy:-1
-            },
-            rightUp:{
-                dx:2,
-                dy:-1
-            },
-            leftDown:{
-                dx:-2,
-                dy:1
-            },
-            rightDown:{
-                dx:2,
-                dy:1
-            }
+    public static knightDirections = {
+        leftUp:{
+            dx:-2,
+            dy:-1
+        },
+        rightUp:{
+            dx:2,
+            dy:-1
+        },
+        leftDown:{
+            dx:-2,
+            dy:1
+        },
+        rightDown:{
+            dx:2,
+            dy:1
         }
     }
 }

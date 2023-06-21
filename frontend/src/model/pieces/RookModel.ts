@@ -21,7 +21,7 @@ export class RookModel extends PieceModel{
 
         if(!rook) return this.possibleMoves;
 
-        const rookDirections = this.rookDirections();
+        const rookDirections = RookModel.rookDirections;
         const chessNotation = square.getPos();
         const posArray = boardModel.posToArrayPos(chessNotation);
 
@@ -38,24 +38,22 @@ export class RookModel extends PieceModel{
         return this.possibleMoves;
     }
 
-    private rookDirections(){
-        return {
-            left:{
-                dx:-1,
-                dy:0
-            },
-            right:{
-                dx:1,
-                dy:0
-            },
-            up:{
-                dx:0,
-                dy:-1
-            },
-            down:{
-                dx:0,
-                dy:1
-            }
+    public static rookDirections = {
+        left:{
+            dx:-1,
+            dy:0
+        },
+        right:{
+            dx:1,
+            dy:0
+        },
+        up:{
+            dx:0,
+            dy:-1
+        },
+        down:{
+            dx:0,
+            dy:1
         }
     }
 }

@@ -1,11 +1,17 @@
-import { PlayerColor, PieceType } from "../../utils/Constants";
+import { PlayerColor, PieceType, BOARD_SIZE } from "../../utils/Constants";
 import { PieceModel } from "./PieceModel";
 import { SquareModel } from "../SquareModel";
 import { ChessBoardModel } from "../ChessBoardModel";
+import { QueenModel } from "./QueenModel";
+import { RookModel } from "./RookModel";
 
 export class KingModel extends PieceModel{
+
+    public isChecked:boolean;
+
     public constructor(type: PieceType, color: PlayerColor){
         super(type, color);
+        this.isChecked = false;
     }
 
     public validMove(boardModel:ChessBoardModel, startSquare:SquareModel,
@@ -21,7 +27,7 @@ export class KingModel extends PieceModel{
 
         if(!king) return this.possibleMoves;
 
-        const kingDirections = this.kingDirections();
+        const kingDirections = KingModel.kingDirections;
         const chessNotation = square.getPos();
         const posArray = boardModel.posToArrayPos(chessNotation);
 
@@ -35,11 +41,55 @@ export class KingModel extends PieceModel{
         }
         console.log(this.possibleMoves)
 
+        this.possibleMoves.forEach(element=>{
+            if(this.kingWillBeInCheck(boardModel,element)){
+                this.possibleMoves.delete(element);
+            }
+        });
+        console.log(this.possibleMoves)
+
         return this.possibleMoves;
     }
+    private kingWillBeInCheck(boardModel:ChessBoardModel, kingPos:string){
+        const board = boardModel.getChessBoard();
+        const posArray = boardModel.posToArrayPos(kingPos);
+        
+        if(!posArray) return false;
 
-    private kingDirections(){
-        return {
+        //check row and column for queen
+        console.log(kingPos);
+        let rookDirections = RookModel.rookDirections;
+        for(const [key,value] of Object.entries(rookDirections)){
+            let i = posArray.i;
+            let j = posArray.j;
+            let flag = true;
+            while(flag){
+                i += value.dy;
+                j += value.dx;
+                if(this.withinBoard(i,j)){
+                    const currentPiece = board[i][j].getPiece();
+                    if(currentPiece && currentPiece.getColor() !== this.color){
+                        if( currentPiece.getType() == PieceType.QUEEN ||
+                            currentPiece.getType() == PieceType.ROOK
+                        ){
+                                return true;
+                        }
+                        else{
+                            flag = false;
+                        }
+                    }else if( currentPiece && 
+                              currentPiece.getColor() === this.color &&
+                              currentPiece !== this){
+                        flag = false;
+                    }
+                }
+                else flag = false;
+            }       
+        }
+
+        return false;
+    }
+    private static kingDirections = {
             left:{
                 dx:-1,
                 dy:0
@@ -72,6 +122,5 @@ export class KingModel extends PieceModel{
                 dx:1,
                 dy:1
             }
-        }
     }
 }

@@ -12,10 +12,11 @@ export class ChessBoardModel{
     private chessBoard: Array<Array<SquareModel>>;
     private playerColor:PlayerColor;
     private posMap:Map<string,{i:number,j:number}> = new Map();
-   // private opponentCoveredSquarePos:Set<string> = new Set();
+    private moveList:Array<{fromSquare:string, toSquare:string}>;
 
     public constructor(playerColor:PlayerColor){
         this.playerColor = playerColor;
+        this.moveList = [];
         let col = //playerColor =="White"?
         ROW_VALUES;//:[...ROW_VALUES].reverse();
 
@@ -47,6 +48,9 @@ export class ChessBoardModel{
     public getChessBoard():Array<Array<SquareModel>>{
         return this.chessBoard;
     }
+    public getMoveList(){
+        return this.moveList;
+    }
     public getPosMap():Map<string,{i:number,j:number}>{
         return this.posMap;
     }
@@ -68,9 +72,56 @@ export class ChessBoardModel{
         }
         return false;
     }
+
+    public isKingInCheck(king: PieceModel): boolean {
+        let kingPos: string | undefined;
+        const playerColor = king.getColor();
+        const opponentColor = playerColor === PlayerColor.WHITE ? PlayerColor.BLACK : PlayerColor.WHITE;
+
+        this.chessBoard.forEach((row) => {
+          row.forEach((square) => {
+            const piece = square.getPiece();
+            if (piece?.getType() === PieceType.KING && piece.getColor() === playerColor) {
+              kingPos = square.getPos();
+            }
+          });
+        });
+
+        if (kingPos) {
+            let kingSquare = this.getSquareByPos(kingPos);
+
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                for (let j = 0; j < BOARD_SIZE; j++) {
+                    const square = this.chessBoard[i][j];
+                    const piece = square.getPiece();
+                    
+                    if (piece && piece.getColor() !== playerColor && kingSquare &&
+                        this.validMove(square, kingSquare, opponentColor)) {
+                        return true;
+                    }
+                }
+            }
+        }
+      
+        return false;
+    }
+
     public posToArrayPos(pos: string){
         return this.posMap.get(pos);
     }
+
+    public getSquareByPos(pos: string){
+        let arrayPos = this.posMap.get(pos);
+        if(!arrayPos) return null;
+
+        let iPos = arrayPos.i;
+        let jPos = arrayPos.j;
+
+        if(!iPos || !jPos) return null;
+
+        return this.chessBoard[iPos][jPos];
+    }
+
     private genPiece(col:string,row:number): PieceModel | undefined{
         if(row == 2){
             return new PawnModel(PieceType.PAWN,PlayerColor.WHITE);
