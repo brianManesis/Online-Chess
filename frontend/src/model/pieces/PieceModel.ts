@@ -48,7 +48,7 @@ export abstract class PieceModel{
                 const tempPiece = tempSquare.getPiece()
                 if(tempPiece && tempPiece.getColor() !== playerColor){
                     this.possibleMoves.add(tempSquare.getPos());
-                    return true;
+                    return false;
                 }
                 else if(!tempPiece){
                     this.possibleMoves.add(tempSquare.getPos());

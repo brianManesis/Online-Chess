@@ -19,7 +19,7 @@ export class PawnModel extends PieceModel{
 
         if(pawn){
             const board = boardModel.getChessBoard();
-            const pieceDirections = this.pawnDirections(pawn);
+            const pieceDirections = PawnModel.pawnDirections(pawn.getColor());
             const chessNotation = square.getPos();
             const posArray = boardModel.posToArrayPos(chessNotation);
 
@@ -101,8 +101,8 @@ export class PawnModel extends PieceModel{
 
     }
     
-    private pawnDirections(pawn:PieceModel){
-        return pawn.getColor() === PlayerColor.WHITE?
+    public static pawnDirections(playerColor:PlayerColor){
+        return playerColor === PlayerColor.WHITE?
         {
             dx: 0,
             dy: -1,

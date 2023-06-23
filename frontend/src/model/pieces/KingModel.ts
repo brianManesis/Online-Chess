@@ -4,6 +4,8 @@ import { SquareModel } from "../SquareModel";
 import { ChessBoardModel } from "../ChessBoardModel";
 import { QueenModel } from "./QueenModel";
 import { RookModel } from "./RookModel";
+import { BishopModel } from "./BishopModel";
+import { KnightModel } from "./KnightModel";
 
 export class KingModel extends PieceModel{
 
@@ -33,16 +35,15 @@ export class KingModel extends PieceModel{
 
         if(!posArray) return this.possibleMoves;
 
-        let i = posArray.i;
+        let i = posArray.i
         let j = posArray.j; 
         
         for(const [key,value] of Object.entries(kingDirections)){
             this.checkSquare(board,i,j,value.dx,value.dy,playerColor);
         }
-        console.log(this.possibleMoves)
-
+        
         this.possibleMoves.forEach(element=>{
-            if(this.kingWillBeInCheck(boardModel,element)){
+            if(this.kingInCheck(boardModel,element)){
                 this.possibleMoves.delete(element);
             }
         });
@@ -50,44 +51,26 @@ export class KingModel extends PieceModel{
 
         return this.possibleMoves;
     }
-    private kingWillBeInCheck(boardModel:ChessBoardModel, kingPos:string){
-        const board = boardModel.getChessBoard();
-        const posArray = boardModel.posToArrayPos(kingPos);
-        
-        if(!posArray) return false;
+    public kingInCheck(boardModel:ChessBoardModel, kingPos:string){
+        let lookForQueen = boardModel.searchBoardFromPos
+        (this,kingPos,QueenModel.queenDirections,PieceType.QUEEN,boardModel.findPieceInDirection);
 
-        //check row and column for queen
-        console.log(kingPos);
-        let rookDirections = RookModel.rookDirections;
-        for(const [key,value] of Object.entries(rookDirections)){
-            let i = posArray.i;
-            let j = posArray.j;
-            let flag = true;
-            while(flag){
-                i += value.dy;
-                j += value.dx;
-                if(this.withinBoard(i,j)){
-                    const currentPiece = board[i][j].getPiece();
-                    if(currentPiece && currentPiece.getColor() !== this.color){
-                        if( currentPiece.getType() == PieceType.QUEEN ||
-                            currentPiece.getType() == PieceType.ROOK
-                        ){
-                                return true;
-                        }
-                        else{
-                            flag = false;
-                        }
-                    }else if( currentPiece && 
-                              currentPiece.getColor() === this.color &&
-                              currentPiece !== this){
-                        flag = false;
-                    }
-                }
-                else flag = false;
-            }       
-        }
+        let lookForRook = boardModel.searchBoardFromPos
+        (this,kingPos,RookModel.rookDirections,PieceType.ROOK,boardModel.findPieceInDirection);
 
-        return false;
+        let lookForBishop = boardModel.searchBoardFromPos
+        (this,kingPos,BishopModel.bishopDirections,PieceType.BISHOP,boardModel.findPieceInDirection);
+
+        let lookForKnight = boardModel.searchBoardFromPos
+        (this,kingPos,KnightModel.knightDirections,PieceType.KNIGHT,boardModel.findPiece);
+
+        let lookForKing = boardModel.searchBoardFromPos
+        (this,kingPos,KingModel.kingDirections,PieceType.KING,boardModel.findPiece);
+
+         let lookForPawn = boardModel.findPawnAttack
+         (this,kingPos,PieceType.PAWN);
+
+        return lookForQueen || lookForRook || lookForBishop || lookForKnight || lookForKing || lookForPawn;
     }
     private static kingDirections = {
             left:{

@@ -31,7 +31,6 @@ export class KnightModel extends PieceModel{
         let j = posArray.j; 
         for(const [key,value] of Object.entries(knightDirections)){
             this.checkSquare(board,i,j,value.dx,value.dy,playerColor);
-            this.checkSquare(board,i,j,value.dy,value.dx,playerColor);
         }
         console.log(this.possibleMoves)
 
@@ -39,21 +38,37 @@ export class KnightModel extends PieceModel{
     }
 
     public static knightDirections = {
-        leftUp:{
+        one:{
             dx:-2,
             dy:-1
         },
-        rightUp:{
+        two:{
             dx:2,
             dy:-1
         },
-        leftDown:{
+        three:{
             dx:-2,
             dy:1
         },
-        rightDown:{
+        four:{
             dx:2,
             dy:1
+        },
+        five:{
+            dx:-1,
+            dy:-2
+        },
+        six:{
+            dx:-1,
+            dy:2
+        },
+        seven:{
+            dx:1,
+            dy:-2
+        },
+        eight:{
+            dx:1,
+            dy:2
         }
     }
 }

@@ -37,7 +37,7 @@ export class BishopModel extends PieceModel{
         return this.possibleMoves;
     }
 
-    private static bishopDirections = {
+    public static bishopDirections = {
             leftUp:{
                 dx:-1,
                 dy:-1
