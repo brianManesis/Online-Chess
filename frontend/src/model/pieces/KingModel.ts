@@ -68,7 +68,7 @@ export class KingModel extends PieceModel{
         (this,kingPos,KingModel.kingDirections,PieceType.KING,boardModel.findPiece);
 
          let lookForPawn = boardModel.findPawnAttack
-         (this,kingPos,PieceType.PAWN);
+         (this,kingPos);
 
         return lookForQueen || lookForRook || lookForBishop || lookForKnight || lookForKing || lookForPawn;
     }

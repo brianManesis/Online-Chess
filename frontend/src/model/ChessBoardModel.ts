@@ -51,15 +51,17 @@ export class ChessBoardModel{
     public getPosMap():Map<string,{i:number,j:number}>{
         return this.posMap;
     }
-    public pieceMove(fromSquare:SquareModel, toSquare:SquareModel){
+    public move(fromSquare:SquareModel, toSquare:SquareModel){
         if(fromSquare && toSquare){
             let pieceOnFromSquare: PieceModel | undefined = fromSquare.getPiece();
-            if(pieceOnFromSquare){
-                pieceOnFromSquare.beenMoved = true;
-                fromSquare.setPiece(undefined);
-                toSquare.setPiece(pieceOnFromSquare);
-                console.log(this.isKingInCheck(PlayerColor.BLACK));
-            }
+            if(!pieceOnFromSquare) return;
+
+            if(this.castleMove(fromSquare,toSquare)) return;
+            if(!this.validMove(fromSquare,toSquare,pieceOnFromSquare.getColor())) return;
+            
+            pieceOnFromSquare.beenMoved = true;
+            fromSquare.setPiece(undefined);
+            toSquare.setPiece(pieceOnFromSquare);
         }
     }
     public validMove(startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor){
@@ -80,6 +82,47 @@ export class ChessBoardModel{
         if(!king) return false;
 
         return king.kingInCheck(this,kingPos);
+    }
+    public castleMove(startSquare:SquareModel, endSquare:SquareModel){
+        const king = startSquare.getPiece();
+        let rookSquare = null;
+        let newRookSquare = null;
+        const endSquarePos = endSquare.getPos();
+        console.log(endSquarePos);
+
+        if(!king || king.getType() !== PieceType.KING) return false;
+        if(king.beenMoved) return false;
+        if( endSquarePos !== "c1" && endSquarePos !== "g1" &&
+            endSquarePos !== "c8" && endSquarePos !== "g8") return false;
+        const kingColor = king.getColor();
+        const row = kingColor === PlayerColor.WHITE? 7:0;
+
+        if(endSquarePos.charAt(0) === "g"){
+            rookSquare = this.chessBoard[row][7];
+            if( this.chessBoard[row][6].getPiece() ||
+                this.chessBoard[row][5].getPiece()
+            ) return false;
+            newRookSquare = this.chessBoard[row][5];
+        }
+        else{
+            rookSquare = this.chessBoard[row][0]; 
+            if( this.chessBoard[row][3].getPiece() ||
+                this.chessBoard[row][2].getPiece() ||
+                this.chessBoard[row][1].getPiece()
+            ) return false;
+            newRookSquare = this.chessBoard[row][3];
+        }
+        const rook = rookSquare.getPiece();
+        if(!rook || rook.getType() !== PieceType.ROOK) return false;
+        if(rook.beenMoved) return false;
+
+        rookSquare.setPiece(undefined);
+        startSquare.setPiece(undefined);
+        newRookSquare.setPiece(rook);
+        endSquare.setPiece(king);
+        king.beenMoved = true;
+        rook.beenMoved = true;
+        return true;
     }
     public searchBoardForPiece(pieceType:PieceType,pieceColor:PlayerColor):{pos:string | undefined, piece:PieceModel | undefined}{
         for(let row of this.chessBoard){
@@ -154,7 +197,7 @@ export class ChessBoardModel{
         }       
         return false;  
     }
-    public findPawnAttack(ignorePiece:PieceModel,kingPos:string, pieceType:PieceType){
+    public findPawnAttack(ignorePiece:PieceModel,kingPos:string){
         let pawnDirection = PawnModel.pawnDirections(ignorePiece.getColor());
         const posArray = this.posToArrayPos(kingPos);
         if(!posArray) return false;

@@ -86,16 +86,10 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
                 let startPos = updatedBoardModel.posToArrayPos(startSquare.id);
                 let endPos = updatedBoardModel.posToArrayPos(endSquare.id);
                 if(startPos && endPos){
-                    let valid = updatedBoardModel.validMove(
-                        updatedBoard[startPos.i][startPos.j],
-                        updatedBoard[endPos.i][endPos.j],
-                        activePieceColor);
-                    if(valid){
-                        updatedBoardModel.pieceMove(
+                        updatedBoardModel.move(
                             updatedBoard[startPos.i][startPos.j],
                             updatedBoard[endPos.i][endPos.j]
                         );
-                    }
                 }
                  setBoardModel(updatedBoardModel);
             }
