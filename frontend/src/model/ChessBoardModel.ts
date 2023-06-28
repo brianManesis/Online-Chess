@@ -12,34 +12,12 @@ export class ChessBoardModel{
     private chessBoard: Array<Array<SquareModel>>;
     private playerColor:PlayerColor;
     private posMap:Map<string,{i:number,j:number}> = new Map();
-    private moveList:Array<{fromSquare:string, toSquare:string}>;
+    private moveList:Array<{fromSquare:string, toSquare:string}>=[];
 
     public constructor(playerColor:PlayerColor){
         this.playerColor = playerColor;
-        this.moveList = [];
-        let col = ROW_VALUES;
-        let row = [...COL_VALUES].reverse();
-       
         this.chessBoard = [[],[],[],[],[],[],[],[]];
-        for(let i = 0; i< BOARD_SIZE; i++){
-            for(let j = 0; j< BOARD_SIZE; j++){
-
-                let pos:string = col[j]+row[i];
-                this.posMap.set(pos,{i:i, j:j});
-                let color = (j+i+2) % 2 == 0? PlayerColor.WHITE:PlayerColor.BLACK
-                let piece:PieceModel | undefined = this.genPiece(col[j],row[i]);
-                
-                if(piece){
-                    this.chessBoard[i].push(
-                        new SquareModel(color,pos,piece)
-                    );
-                }else{
-                    this.chessBoard[i].push(
-                        new SquareModel(color,pos)
-                    );
-                }
-            }
-        }
+        this.initBoard();
     }
 
     public getChessBoard():Array<Array<SquareModel>>{
@@ -56,12 +34,16 @@ export class ChessBoardModel{
             let pieceOnFromSquare: PieceModel | undefined = fromSquare.getPiece();
             if(!pieceOnFromSquare) return;
 
+            let pieceColor = pieceOnFromSquare.getColor();
             if(this.castleMove(fromSquare,toSquare)) return;
-            if(!this.validMove(fromSquare,toSquare,pieceOnFromSquare.getColor())) return;
-            
+            if(this.queeningMove(fromSquare,toSquare)) return;
+            if(this.enPassant(fromSquare,toSquare)) return;
+            if(!this.validMove(fromSquare,toSquare,pieceColor)) return;
+
             pieceOnFromSquare.beenMoved = true;
             fromSquare.setPiece(undefined);
             toSquare.setPiece(pieceOnFromSquare);
+            this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
         }
     }
     public validMove(startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor){
@@ -73,22 +55,11 @@ export class ChessBoardModel{
         return false;
     }
 
-    public isKingInCheck(kingColor:PlayerColor): boolean {
-        const kingLocation = this.searchBoardForPiece(PieceType.KING, kingColor)
-        const kingPos = kingLocation.pos;
-        if(!kingPos) return false;
-
-        const king = kingLocation.piece as KingModel;
-        if(!king) return false;
-
-        return king.kingInCheck(this,kingPos);
-    }
     public castleMove(startSquare:SquareModel, endSquare:SquareModel){
-        const king = startSquare.getPiece();
+        const king = startSquare.getPiece() as KingModel;
         let rookSquare = null;
         let newRookSquare = null;
         const endSquarePos = endSquare.getPos();
-        console.log(endSquarePos);
 
         if(!king || king.getType() !== PieceType.KING) return false;
         if(king.beenMoved) return false;
@@ -99,16 +70,16 @@ export class ChessBoardModel{
 
         if(endSquarePos.charAt(0) === "g"){
             rookSquare = this.chessBoard[row][7];
-            if( this.chessBoard[row][6].getPiece() ||
-                this.chessBoard[row][5].getPiece()
+            if( this.chessBoard[row][6].getPiece() || king.kingInCheck(this,this.chessBoard[row][6].getPos())||
+                this.chessBoard[row][5].getPiece() || king.kingInCheck(this,this.chessBoard[row][5].getPos())
             ) return false;
             newRookSquare = this.chessBoard[row][5];
         }
         else{
             rookSquare = this.chessBoard[row][0]; 
-            if( this.chessBoard[row][3].getPiece() ||
-                this.chessBoard[row][2].getPiece() ||
-                this.chessBoard[row][1].getPiece()
+            if( this.chessBoard[row][3].getPiece() || king.kingInCheck(this,this.chessBoard[row][3].getPos())||
+                this.chessBoard[row][2].getPiece() || king.kingInCheck(this,this.chessBoard[row][2].getPos())||
+                this.chessBoard[row][1].getPiece() || king.kingInCheck(this,this.chessBoard[row][1].getPos())
             ) return false;
             newRookSquare = this.chessBoard[row][3];
         }
@@ -122,7 +93,82 @@ export class ChessBoardModel{
         endSquare.setPiece(king);
         king.beenMoved = true;
         rook.beenMoved = true;
+        this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
         return true;
+    }
+    private queeningMove(startSquare:SquareModel, endSquare:SquareModel){
+        const pawn = startSquare.getPiece();
+        const endSquarePos = this.posToArrayPos(endSquare.getPos());
+        if(!pawn || pawn.getType() !== PieceType.PAWN) return false;
+        if(!endSquarePos) return false;
+        
+        const pawnColor = pawn.getColor();
+        let endRow = pawnColor === PlayerColor.WHITE? 0:7;
+        let endSquareRow = endSquarePos.i;
+        
+        if(pawnColor===PlayerColor.WHITE && endSquareRow!==endRow) return false;
+        else if(pawnColor===PlayerColor.BLACK && endSquareRow!==endRow) return false;
+
+        startSquare.setPiece(undefined);
+        endSquare.setPiece(new QueenModel(PieceType.QUEEN,pawnColor));
+        this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+        return true;
+    }
+    private enPassant(startSquare:SquareModel, endSquare:SquareModel){
+        const board = this.chessBoard;
+        const pawn = startSquare.getPiece();
+        const startSquarePos = this.posToArrayPos(startSquare.getPos());
+        if(this.moveList.length === 0) return false;
+
+        const lastMove = this.getMoveList().slice(-1)[0];
+        const pieceLastMovedNewPos = this.posToArrayPos(lastMove.toSquare);
+        const pieceLastMovedOldPos = this.posToArrayPos(lastMove.fromSquare);
+
+        if(!pawn || pawn.getType() !== PieceType.PAWN) return false;
+        if(!startSquarePos) return false;
+        if(!pieceLastMovedNewPos || !pieceLastMovedOldPos) return false;
+
+        let direction = PawnModel.pawnDirections(pawn.getColor());
+        
+        const pieceLastMoved = board[pieceLastMovedNewPos.i][pieceLastMovedNewPos.j];
+
+        let pieceLeft;
+        let pieceRight;
+        if(ChessBoardModel.withinBoard(startSquarePos.i,startSquarePos.j-1)){
+            pieceLeft = board[startSquarePos.i][startSquarePos.j-1];
+        }
+        if(ChessBoardModel.withinBoard(startSquarePos.i,startSquarePos.j+1)){
+            pieceRight = board[startSquarePos.i][startSquarePos.j+1];
+        }
+        let pieceLeftTakes = board[startSquarePos.i+direction.takes.left.dy][startSquarePos.j+direction.takes.left.dx];
+        let pieceRightTakes = board[startSquarePos.i+direction.takes.right.dy][startSquarePos.j+direction.takes.right.dx];
+        let pieceLastMovedDx = Math.abs(pieceLastMovedNewPos.j-pieceLastMovedOldPos.j);
+        let pieceLastMovedDy = Math.abs(pieceLastMovedNewPos.i-pieceLastMovedOldPos.i);
+        if(pieceLastMoved == pieceLeft && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceLeftTakes){
+            startSquare.setPiece(undefined);
+            pieceLeft.setPiece(undefined);
+            pieceLeftTakes.setPiece(pawn);
+            this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+            return true;
+        }
+        if(pieceLastMoved == pieceRight && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceRightTakes){
+            startSquare.setPiece(undefined);
+            pieceRight.setPiece(undefined);
+            pieceRightTakes.setPiece(pawn);
+            this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+            return true;
+        }
+        return false;
+    }
+    public isKingInCheck(kingColor:PlayerColor): boolean {
+        const kingLocation = this.searchBoardForPiece(PieceType.KING, kingColor)
+        const kingPos = kingLocation.pos;
+        if(!kingPos) return false;
+
+        const king = kingLocation.piece as KingModel;
+        if(!king) return false;
+
+        return king.kingInCheck(this,kingPos);
     }
     public searchBoardForPiece(pieceType:PieceType,pieceColor:PlayerColor):{pos:string | undefined, piece:PieceModel | undefined}{
         for(let row of this.chessBoard){
@@ -228,6 +274,31 @@ export class ChessBoardModel{
                j>=0 &&
                j<BOARD_SIZE;
     }
+
+    private initBoard(){
+        let col = ROW_VALUES;
+        let row = [...COL_VALUES].reverse();
+       
+        for(let i = 0; i< BOARD_SIZE; i++){
+            for(let j = 0; j< BOARD_SIZE; j++){
+
+                let pos:string = col[j]+row[i];
+                this.posMap.set(pos,{i:i, j:j});
+                let color = (j+i+2) % 2 == 0? PlayerColor.WHITE:PlayerColor.BLACK
+                let piece:PieceModel | undefined = this.genPiece(col[j],row[i]);
+                
+                if(piece){
+                    this.chessBoard[i].push(
+                        new SquareModel(color,pos,piece)
+                    );
+                }else{
+                    this.chessBoard[i].push(
+                        new SquareModel(color,pos)
+                    );
+                }
+            }
+        }
+    }
     private genPiece(col:string,row:number): PieceModel | undefined{
         if(row == 2){
             return new PawnModel(PieceType.PAWN,PlayerColor.WHITE);
@@ -275,8 +346,7 @@ export class ChessBoardModel{
     }
 
     public clone():ChessBoardModel{
-        const clone = new ChessBoardModel(this.playerColor);
-
+        const clone =Object.assign(Object.create(Object.getPrototypeOf(this)), this);
         clone.chessBoard = this.chessBoard.map((row) =>
             row.map((square) => {
             const clonedSquare = new SquareModel(square.getColor(), square.getPos());

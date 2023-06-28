@@ -71,36 +71,6 @@ export class PawnModel extends PieceModel{
         return this.possibleMoves;
     }
 
-    private enPassant(
-        boardModel:ChessBoardModel, 
-        pos:{i:number,j:number}, 
-        playerColor:PlayerColor,
-        boardirections:object
-        ){
-
-        const board = boardModel.getChessBoard();
-        const lastMove = boardModel.getMoveList().slice(-1)[0];
-        const pieceLastMovedNewPos = boardModel.posToArrayPos(lastMove.toSquare);
-        const pieceLastMovedOldPos = boardModel.posToArrayPos(lastMove.fromSquare)
-
-        if(!pieceLastMovedNewPos || !pieceLastMovedOldPos) return;
-        
-        const pieceLastMoved = board[pieceLastMovedNewPos.i][pieceLastMovedNewPos.j];
-
-        if(!this.withinBoard(pos.i,pos.j+1)) return;
-
-        let pieceLeft = board[pos.i][pos.j+1];
-        let pieceRight = board[pos.i][pos.j-1];
-        let pieceLastMovedDx = Math.abs(pieceLastMovedNewPos.j-pieceLastMovedOldPos.j);
-        let pieceLastMovedDy = Math.abs(pieceLastMovedNewPos.i-pieceLastMovedOldPos.i);
-        if(pieceLastMoved == pieceLeft && pieceLastMovedDx===0 && pieceLastMovedDy===2){
-            
-        }
-    }
-    private queening(){
-
-    }
-    
     public static pawnDirections(playerColor:PlayerColor){
         return playerColor === PlayerColor.WHITE?
         {
