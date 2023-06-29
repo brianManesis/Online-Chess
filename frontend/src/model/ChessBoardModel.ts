@@ -10,42 +10,40 @@ import { ROW_VALUES, COL_VALUES, PlayerColor, PieceType, BOARD_SIZE} from "../ut
 
 export class ChessBoardModel{
     private chessBoard: Array<Array<SquareModel>>;
-    private playerColor:PlayerColor;
     private posMap:Map<string,{i:number,j:number}> = new Map();
     private moveList:Array<{fromSquare:string, toSquare:string}>=[];
+    public turn:PlayerColor;
 
-    public constructor(playerColor:PlayerColor){
-        this.playerColor = playerColor;
+    public constructor(){
         this.chessBoard = [[],[],[],[],[],[],[],[]];
         this.initBoard();
+        this.turn = PlayerColor.WHITE;
     }
 
-    public getChessBoard():Array<Array<SquareModel>>{
-        return this.chessBoard;
-    }
-    public getMoveList(){
-        return this.moveList;
-    }
-    public getPosMap():Map<string,{i:number,j:number}>{
-        return this.posMap;
-    }
-    public move(fromSquare:SquareModel, toSquare:SquareModel){
+    public move(startPos:string, endPos:string){
+        const fromSquare = this.getSquareByPos(startPos);
+        const toSquare = this.getSquareByPos(endPos);
+
         if(fromSquare && toSquare){
             let pieceOnFromSquare: PieceModel | undefined = fromSquare.getPiece();
-            if(!pieceOnFromSquare) return;
+            if(!pieceOnFromSquare) return false;
 
             let pieceColor = pieceOnFromSquare.getColor();
-            if(this.castleMove(fromSquare,toSquare)) return;
-            if(this.queeningMove(fromSquare,toSquare)) return;
-            if(this.enPassant(fromSquare,toSquare)) return;
-            if(!this.validMove(fromSquare,toSquare,pieceColor)) return;
+            if(pieceColor !== this.turn) return false;
+            if(this.castleMove(fromSquare,toSquare)) return true;
+            if(this.queeningMove(fromSquare,toSquare)) return true;
+            if(this.enPassant(fromSquare,toSquare)) return true;
+            if(!this.validMove(fromSquare,toSquare,pieceColor)) return false;
 
             pieceOnFromSquare.beenMoved = true;
             fromSquare.setPiece(undefined);
             toSquare.setPiece(pieceOnFromSquare);
             this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
+            this.changeTurn();
+            return true;
         }
     }
+    
     public validMove(startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor){
         const pieceMove = startSquare.getPiece();
         if(pieceMove &&
@@ -94,6 +92,7 @@ export class ChessBoardModel{
         king.beenMoved = true;
         rook.beenMoved = true;
         this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+        this.changeTurn();
         return true;
     }
     private queeningMove(startSquare:SquareModel, endSquare:SquareModel){
@@ -112,6 +111,7 @@ export class ChessBoardModel{
         startSquare.setPiece(undefined);
         endSquare.setPiece(new QueenModel(PieceType.QUEEN,pawnColor));
         this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+        this.changeTurn();
         return true;
     }
     private enPassant(startSquare:SquareModel, endSquare:SquareModel){
@@ -149,6 +149,7 @@ export class ChessBoardModel{
             pieceLeft.setPiece(undefined);
             pieceLeftTakes.setPiece(pawn);
             this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+            this.changeTurn();
             return true;
         }
         if(pieceLastMoved == pieceRight && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceRightTakes){
@@ -156,6 +157,7 @@ export class ChessBoardModel{
             pieceRight.setPiece(undefined);
             pieceRightTakes.setPiece(pawn);
             this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+            this.changeTurn();
             return true;
         }
         return false;
@@ -253,6 +255,15 @@ export class ChessBoardModel{
         return this.findPiece(this.chessBoard,ignorePiece,posArray.i,posArray.j,leftTakes,PieceType.PAWN) ||
                this.findPiece(this.chessBoard,ignorePiece,posArray.i,posArray.j,rightTakes,PieceType.PAWN)
     }
+    public getChessBoard():Array<Array<SquareModel>>{
+        return this.chessBoard;
+    }
+    public getMoveList(){
+        return this.moveList;
+    }
+    public getPosMap():Map<string,{i:number,j:number}>{
+        return this.posMap;
+    }
     public posToArrayPos(pos: string){
         return this.posMap.get(pos);
     }
@@ -263,16 +274,21 @@ export class ChessBoardModel{
 
         let iPos = arrayPos.i;
         let jPos = arrayPos.j;
+        const square = this.chessBoard[iPos][jPos];
+        if(!square) return null;
 
-        if(!iPos || !jPos) return null;
-
-        return this.chessBoard[iPos][jPos];
+        return square;
     }
     public static withinBoard(i:number, j:number){
         return i>=0 &&
                i<BOARD_SIZE &&
                j>=0 &&
                j<BOARD_SIZE;
+    }
+    private changeTurn() {
+        this.turn = this.turn === PlayerColor.WHITE?
+            PlayerColor.BLACK:
+            PlayerColor.WHITE;
     }
 
     private initBoard(){

@@ -26,7 +26,7 @@ export class PawnModel extends PieceModel{
             if(posArray){
                 let fowardI = posArray.i+pieceDirections.dy;
                 let fowardJ = posArray.j+pieceDirections.dx;
-                if(this.withinBoard(fowardI,fowardJ)){
+                if(ChessBoardModel.withinBoard(fowardI,fowardJ)){
                     let forwardSquare = board[fowardI][fowardJ];
                     let forwardSquarePiece = forwardSquare.getPiece();
                     if(forwardSquarePiece === undefined){
@@ -35,7 +35,7 @@ export class PawnModel extends PieceModel{
                     if(!pawn.beenMoved && forwardSquarePiece === undefined){
                         let fowardI = posArray.i+2*pieceDirections.dy;
                         let fowardJ = posArray.j+2*pieceDirections.dx;
-                        if(this.withinBoard(fowardI,fowardJ)){
+                        if(ChessBoardModel.withinBoard(fowardI,fowardJ)){
                             let forwardSquare = board[fowardI][fowardJ];
                             let forwardSquarePiece = forwardSquare.getPiece();
                             if(forwardSquarePiece === undefined){
@@ -48,7 +48,7 @@ export class PawnModel extends PieceModel{
                 let leftTakes = pieceDirections.takes.left;
                 let leftI = posArray.i+leftTakes.dy;
                 let leftJ = posArray.j+leftTakes.dx;
-                if(this.withinBoard(leftI,leftJ)){
+                if(ChessBoardModel.withinBoard(leftI,leftJ)){
                     let leftSquare = board[leftI][leftJ];
                     let leftSquarePiece = leftSquare.getPiece();
                     if(leftSquarePiece && leftSquarePiece.getColor() !== playerColor){
@@ -59,7 +59,7 @@ export class PawnModel extends PieceModel{
                 let rightTakes = pieceDirections.takes.right;
                 let rightI = posArray.i+rightTakes.dy;
                 let rightJ = posArray.j+rightTakes.dx;
-                if(this.withinBoard(rightI,rightJ)){
+                if(ChessBoardModel.withinBoard(rightI,rightJ)){
                     let rightSquare = board[rightI][rightJ];
                     let rightSquarePiece = rightSquare.getPiece();
                     if(rightSquarePiece && rightSquarePiece.getColor() !== playerColor){

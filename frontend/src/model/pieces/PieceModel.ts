@@ -24,12 +24,6 @@ export abstract class PieceModel{
     public getColor(): PlayerColor{
         return this.color;
     }
-    public withinBoard(i:number, j:number){
-        return i>=0 &&
-               i<BOARD_SIZE &&
-               j>=0 &&
-               j<BOARD_SIZE;
-    }
     protected checkSquares(board:Array<Array<SquareModel>>,i:number,j:number,dx:number,
         dy:number, playerColor:PlayerColor){
         let flag = true;
@@ -43,7 +37,7 @@ export abstract class PieceModel{
         dy:number, playerColor:PlayerColor){
             let dI:number = i+dy;
             let dJ:number = j+dx;
-            if(this.withinBoard(dI,dJ)){
+            if(ChessBoardModel.withinBoard(dI,dJ)){
                 const tempSquare:SquareModel = board[dI][dJ];
                 const tempPiece = tempSquare.getPiece()
                 if(tempPiece && tempPiece.getColor() !== playerColor){

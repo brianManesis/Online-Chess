@@ -5,10 +5,12 @@ import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
 import { SquareModel } from '../../../../model/SquareModel';
+import { GameModel } from '../../../../model/GameModel';
 
 export default function Chessboard(props:{playerColor:PlayerColor}){
+    const game = new GameModel();
     const playerColor = props.playerColor;
-    const chessBoard:ChessBoardModel = new ChessBoardModel(playerColor);
+    const chessBoard:ChessBoardModel = game.getBoardModel();//new ChessBoardModel();
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [activePiece, setActivePiece] = useState< HTMLElement | null>(null);
     const [boardModel,setBoardModel] = useState(chessBoard);
@@ -82,16 +84,13 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
 
             if(startSquare && endSquare){
                 const updatedBoardModel = boardModel.clone();
-                const updatedBoard = updatedBoardModel.getChessBoard();
-                let startPos = updatedBoardModel.posToArrayPos(startSquare.id);
-                let endPos = updatedBoardModel.posToArrayPos(endSquare.id);
-                if(startPos && endPos){
-                        updatedBoardModel.move(
-                            updatedBoard[startPos.i][startPos.j],
-                            updatedBoard[endPos.i][endPos.j]
-                        );
-                }
-                 setBoardModel(updatedBoardModel);
+                game.setBoardModel(updatedBoardModel);
+                game.move(
+                    startSquare.id,
+                    endSquare.id
+                );        
+                console.log(game.turn);
+                setBoardModel(updatedBoardModel);
             }
             setActivePiece(null);
         }
