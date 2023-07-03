@@ -1,4 +1,4 @@
-import { PieceType, PlayerColor, BOARD_SIZE } from "../../utils/Constants";
+import { PieceType, PlayerColor } from "../../utils/Constants";
 import { ChessBoardModel } from "../ChessBoardModel";
 import { SquareModel } from "../SquareModel";
 

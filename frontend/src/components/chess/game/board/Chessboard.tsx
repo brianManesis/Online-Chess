@@ -5,12 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
 import { SquareModel } from '../../../../model/SquareModel';
-import { GameModel } from '../../../../model/GameModel';
 
 export default function Chessboard(props:{playerColor:PlayerColor}){
-    const game = new GameModel();
     const playerColor = props.playerColor;
-    const chessBoard:ChessBoardModel = game.getBoardModel();//new ChessBoardModel();
+    const chessBoard:ChessBoardModel = new ChessBoardModel();
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [activePiece, setActivePiece] = useState< HTMLElement | null>(null);
     const [boardModel,setBoardModel] = useState(chessBoard);
@@ -18,10 +16,9 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
         
     useEffect(()=>{
         makeChessBoard();
-        // console.log(boardModel);
-        // console.log(boardView);
+        console.log(boardModel);
     },[boardModel]);
-
+    
     function makeChessBoard(){
         const boardViewTemp:any = [[],[],[],[],[],[],[],[]];
         const currentBoardModel:Array<Array<SquareModel>> = boardModel.getChessBoard();
@@ -47,6 +44,7 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
         }
         setBoardView(() => boardViewTemp);
     }
+    
     function handleClick(event: React.MouseEvent){
         if(activePiece){
             movePiece(event);
@@ -74,7 +72,7 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
                 let endPieceColor = endSquare.id.includes("White")?
                 PlayerColor.WHITE:PlayerColor.BLACK;
 
-                if(endPieceColor == activePieceColor){
+                if(endPieceColor === activePieceColor){
                     setActivePiece(endSquare);
                     return;
                 }
@@ -84,12 +82,10 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
 
             if(startSquare && endSquare){
                 const updatedBoardModel = boardModel.clone();
-                game.setBoardModel(updatedBoardModel);
-                game.move(
+                updatedBoardModel.move(
                     startSquare.id,
                     endSquare.id
                 );        
-                console.log(game.turn);
                 setBoardModel(updatedBoardModel);
             }
             setActivePiece(null);

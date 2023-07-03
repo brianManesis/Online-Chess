@@ -11,10 +11,10 @@ export class QueenModel extends PieceModel{
     public validMove(boardModel:ChessBoardModel, startSquare:SquareModel,
         endSquare:SquareModel, playerColor:PlayerColor): boolean {
             const pos = endSquare.getPos();
-            return this.updatePossibleMoves(boardModel,startSquare,playerColor).has(pos); 
+            return this.getPossibleMoves(boardModel,startSquare,playerColor).has(pos); 
     }
 
-    private updatePossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
+    private getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const queen = square.getPiece();
         const board = boardModel.getChessBoard();
         this.possibleMoves.clear();
@@ -30,7 +30,7 @@ export class QueenModel extends PieceModel{
         let i = posArray.i;
         let j = posArray.j; 
         
-        for(const [key,value] of Object.entries(queenDirections)){
+        for(const [,value] of Object.entries(queenDirections)){
             this.checkSquares(board,i,j,value.dx,value.dy,playerColor);
         }
         console.log(this.possibleMoves)

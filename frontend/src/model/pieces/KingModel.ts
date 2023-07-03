@@ -1,4 +1,4 @@
-import { PlayerColor, PieceType, BOARD_SIZE } from "../../utils/Constants";
+import { PlayerColor, PieceType } from "../../utils/Constants";
 import { PieceModel } from "./PieceModel";
 import { SquareModel } from "../SquareModel";
 import { ChessBoardModel } from "../ChessBoardModel";
@@ -19,10 +19,10 @@ export class KingModel extends PieceModel{
     public validMove(boardModel:ChessBoardModel, startSquare:SquareModel,
         endSquare:SquareModel, playerColor:PlayerColor): boolean {
             const pos = endSquare.getPos();
-            return this.updatePossibleMoves(boardModel,startSquare,playerColor).has(pos); 
+            return this.getPossibleMoves(boardModel,startSquare,playerColor).has(pos); 
         }
     
-    private updatePossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
+    private getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const king = square.getPiece();
         const board = boardModel.getChessBoard();
         this.possibleMoves.clear();
@@ -38,7 +38,7 @@ export class KingModel extends PieceModel{
         let i = posArray.i
         let j = posArray.j; 
         
-        for(const [key,value] of Object.entries(kingDirections)){
+        for(const [,value] of Object.entries(kingDirections)){
             this.checkSquare(board,i,j,value.dx,value.dy,playerColor);
         }
         

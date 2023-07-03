@@ -11,10 +11,10 @@ export class KnightModel extends PieceModel{
     public validMove(boardModel:ChessBoardModel, startSquare:SquareModel,
         endSquare:SquareModel, playerColor:PlayerColor): boolean {
             const pos = endSquare.getPos();
-            return this.updatePossibleMoves(boardModel,startSquare,playerColor).has(pos);  
+            return this.getPossibleMoves(boardModel,startSquare,playerColor).has(pos);  
     }
 
-    private updatePossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
+    private getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const knight = square.getPiece();
         const board = boardModel.getChessBoard();
         this.possibleMoves.clear();

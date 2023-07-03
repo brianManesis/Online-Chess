@@ -1,3 +1,4 @@
+import { ROW_VALUES, COL_VALUES, PlayerColor, PieceType, BOARD_SIZE } from "../utils/Constants";
 import { PieceModel } from "./pieces/PieceModel";
 import { PawnModel } from "./pieces/PawnModel";
 import { RookModel } from "./pieces/RookModel";
@@ -6,15 +7,18 @@ import { BishopModel } from "./pieces/BishopModel";
 import { QueenModel } from "./pieces/QueenModel";
 import { KingModel } from "./pieces/KingModel";
 import { SquareModel } from "./SquareModel";
-import { ROW_VALUES, COL_VALUES, PlayerColor, PieceType, BOARD_SIZE} from "../utils/Constants";
 
 export class ChessBoardModel{
     private chessBoard: Array<Array<SquareModel>>;
     private posMap:Map<string,{i:number,j:number}> = new Map();
+    private whitePieces:Array<PieceModel>;
+    private blackPieces:Array<PieceModel>;
     private moveList:Array<{fromSquare:string, toSquare:string}>=[];
     public turn:PlayerColor;
 
     public constructor(){
+        this.whitePieces = whitePieces;
+        this.blackPieces = blackPieces;
         this.chessBoard = [[],[],[],[],[],[],[],[]];
         this.initBoard();
         this.turn = PlayerColor.WHITE;
@@ -24,26 +28,33 @@ export class ChessBoardModel{
         const fromSquare = this.getSquareByPos(startPos);
         const toSquare = this.getSquareByPos(endPos);
 
-        if(fromSquare && toSquare){
-            let pieceOnFromSquare: PieceModel | undefined = fromSquare.getPiece();
-            if(!pieceOnFromSquare) return false;
+        if(!fromSquare || !toSquare) return false;
 
-            let pieceColor = pieceOnFromSquare.getColor();
-            if(pieceColor !== this.turn) return false;
-            if(this.castleMove(fromSquare,toSquare)) return true;
-            if(this.queeningMove(fromSquare,toSquare)) return true;
-            if(this.enPassant(fromSquare,toSquare)) return true;
-            if(!this.validMove(fromSquare,toSquare,pieceColor)) return false;
+        let pieceOnFromSquare: PieceModel | undefined = fromSquare.getPiece();
+        if(!pieceOnFromSquare) return false;
 
-            pieceOnFromSquare.beenMoved = true;
-            fromSquare.setPiece(undefined);
-            toSquare.setPiece(pieceOnFromSquare);
-            this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
-            this.changeTurn();
-            return true;
-        }
+        let pieceColor = pieceOnFromSquare.getColor();
+        if(pieceColor !== this.turn) return false;
+        if(this.checkmate(pieceColor)) return false;
+        if(this.castleMove(fromSquare,toSquare)) return true;
+        if(this.queeningMove(fromSquare,toSquare)) return true;
+        if(this.enPassant(fromSquare,toSquare)) return true;
+        if(!this.validMove(fromSquare,toSquare,pieceColor)) return false;
+
+        pieceOnFromSquare.beenMoved = true;
+        fromSquare.setPiece(undefined);
+        toSquare.setPiece(pieceOnFromSquare);
+        this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
+        this.changeTurn();
+        return true;
     }
-    
+    public checkmate(pieceColor:PlayerColor){
+        const search = this.searchBoardForPiece(PieceType.KING,pieceColor);
+        const king = search.piece as KingModel;
+        const kingPos = search.pos;
+        if(!king || !kingPos) return false;
+        if(!king.kingInCheck(this,kingPos)) return false;
+    }
     public validMove(startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor){
         const pieceMove = startSquare.getPiece();
         if(pieceMove &&
@@ -144,7 +155,7 @@ export class ChessBoardModel{
         let pieceRightTakes = board[startSquarePos.i+direction.takes.right.dy][startSquarePos.j+direction.takes.right.dx];
         let pieceLastMovedDx = Math.abs(pieceLastMovedNewPos.j-pieceLastMovedOldPos.j);
         let pieceLastMovedDy = Math.abs(pieceLastMovedNewPos.i-pieceLastMovedOldPos.i);
-        if(pieceLastMoved == pieceLeft && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceLeftTakes){
+        if(pieceLastMoved === pieceLeft && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceLeftTakes){
             startSquare.setPiece(undefined);
             pieceLeft.setPiece(undefined);
             pieceLeftTakes.setPiece(pawn);
@@ -152,7 +163,7 @@ export class ChessBoardModel{
             this.changeTurn();
             return true;
         }
-        if(pieceLastMoved == pieceRight && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceRightTakes){
+        if(pieceLastMoved === pieceRight && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceRightTakes){
             startSquare.setPiece(undefined);
             pieceRight.setPiece(undefined);
             pieceRightTakes.setPiece(pawn);
@@ -189,7 +200,7 @@ export class ChessBoardModel{
         const posArray = this.posToArrayPos(startPos);
         if(!posArray) return false;
 
-        for(const [key,value] of Object.entries(directions)){
+        for(const [,value] of Object.entries(directions)){
             let i = posArray.i;
             let j = posArray.j;
 
@@ -205,7 +216,7 @@ export class ChessBoardModel{
         if(ChessBoardModel.withinBoard(i,j)){
             const currentPiece = board[i][j].getPiece();
             if(currentPiece && currentPiece.getColor() !== ignorePiece.getColor()){
-                if( currentPiece.getType() == pieceType ){
+                if( currentPiece.getType() === pieceType ){
                         return true;
                 }
                 else{
@@ -229,7 +240,7 @@ export class ChessBoardModel{
             if(ChessBoardModel.withinBoard(i,j)){
                 const currentPiece = board[i][j].getPiece();
                 if(currentPiece && currentPiece.getColor() !== ignorePiece.getColor()){
-                    if( currentPiece.getType() == pieceType){
+                    if( currentPiece.getType() === pieceType){
                             return true;
                     }
                     else{
@@ -294,70 +305,32 @@ export class ChessBoardModel{
     private initBoard(){
         let col = ROW_VALUES;
         let row = [...COL_VALUES].reverse();
-       
+        let k = 0, n = 0;
         for(let i = 0; i< BOARD_SIZE; i++){
             for(let j = 0; j< BOARD_SIZE; j++){
 
                 let pos:string = col[j]+row[i];
                 this.posMap.set(pos,{i:i, j:j});
-                let color = (j+i+2) % 2 == 0? PlayerColor.WHITE:PlayerColor.BLACK
-                let piece:PieceModel | undefined = this.genPiece(col[j],row[i]);
+                let color = (j+i+2) % 2 === 0? PlayerColor.WHITE:PlayerColor.BLACK;
                 
-                if(piece){
+                if(i===0 || i===1){
                     this.chessBoard[i].push(
-                        new SquareModel(color,pos,piece)
+                        new SquareModel(color,pos,this.blackPieces[k])
                     );
-                }else{
+                    k++;
+                }
+                else if(i===6 || i===7){
+                    this.chessBoard[i].push(
+                        new SquareModel(color,pos,this.whitePieces[n])
+                    );
+                    n++;
+                }
+                else{
                     this.chessBoard[i].push(
                         new SquareModel(color,pos)
                     );
                 }
             }
-        }
-    }
-    private genPiece(col:string,row:number): PieceModel | undefined{
-        if(row == 2){
-            return new PawnModel(PieceType.PAWN,PlayerColor.WHITE);
-        }
-        else if(row == 7){
-            return new PawnModel(PieceType.PAWN,PlayerColor.BLACK);
-        }
-        else if(row == 1){
-            if(col == 'a' || col == 'h'){
-                return new RookModel(PieceType.ROOK,PlayerColor.WHITE);
-            }
-            else if(col== 'b' || col == 'g'){
-                return new KnightModel(PieceType.KNIGHT, PlayerColor.WHITE);
-            }
-            else if(col== 'c' || col == 'f'){
-                return new BishopModel(PieceType.BISHOP, PlayerColor.WHITE);
-            }
-            else if(col == 'd'){
-                return new QueenModel(PieceType.QUEEN, PlayerColor.WHITE);
-            }
-            else{
-                return new KingModel(PieceType.KING, PlayerColor.WHITE);
-            }
-        }
-        else if(row == 8){
-            if(col == 'a' || col == 'h'){
-                return new RookModel(PieceType.ROOK,PlayerColor.BLACK);
-            }
-            else if(col== 'b' || col == 'g'){
-                return new KnightModel(PieceType.KNIGHT, PlayerColor.BLACK);
-            }
-            else if(col== 'c' || col == 'f'){
-                return new BishopModel(PieceType.BISHOP, PlayerColor.BLACK);
-            }
-            else if(col == 'd'){
-                return new QueenModel(PieceType.QUEEN, PlayerColor.BLACK);
-            }
-            else{
-                return new KingModel(PieceType.KING, PlayerColor.BLACK);
-            }
-        }
-        else{
-            return undefined;
         }
     }
 
@@ -379,3 +352,40 @@ export class ChessBoardModel{
         return clone;
     }
 }
+ const whitePieces = [
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new PawnModel(PieceType.PAWN,PlayerColor.WHITE),
+    new RookModel(PieceType.ROOK,PlayerColor.WHITE),
+    new KnightModel(PieceType.KNIGHT, PlayerColor.WHITE),
+    new BishopModel(PieceType.BISHOP, PlayerColor.WHITE),
+    new QueenModel(PieceType.QUEEN, PlayerColor.WHITE),
+    new KingModel(PieceType.KING, PlayerColor.WHITE),
+    new BishopModel(PieceType.BISHOP, PlayerColor.WHITE),
+    new KnightModel(PieceType.KNIGHT, PlayerColor.WHITE),
+    new RookModel(PieceType.ROOK,PlayerColor.WHITE)
+];
+
+ const blackPieces = [
+    new RookModel(PieceType.ROOK,PlayerColor.BLACK),
+    new KnightModel(PieceType.KNIGHT, PlayerColor.BLACK),
+    new BishopModel(PieceType.BISHOP, PlayerColor.BLACK),
+    new QueenModel(PieceType.QUEEN, PlayerColor.BLACK),
+    new KingModel(PieceType.KING, PlayerColor.BLACK),
+    new BishopModel(PieceType.BISHOP, PlayerColor.BLACK),
+    new KnightModel(PieceType.KNIGHT, PlayerColor.BLACK),
+    new RookModel(PieceType.ROOK,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK),
+    new PawnModel(PieceType.PAWN,PlayerColor.BLACK)
+];
