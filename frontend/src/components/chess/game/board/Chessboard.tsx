@@ -16,7 +16,6 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
         
     useEffect(()=>{
         makeChessBoard();
-        console.log(boardModel);
     },[boardModel]);
     
     function makeChessBoard(){

@@ -11,14 +11,10 @@ import { SquareModel } from "./SquareModel";
 export class ChessBoardModel{
     private chessBoard: Array<Array<SquareModel>>;
     private posMap:Map<string,{i:number,j:number}> = new Map();
-    private whitePieces:Array<PieceModel>;
-    private blackPieces:Array<PieceModel>;
     private moveList:Array<{fromSquare:string, toSquare:string}>=[];
     public turn:PlayerColor;
 
     public constructor(){
-        this.whitePieces = whitePieces;
-        this.blackPieces = blackPieces;
         this.chessBoard = this.initBoard();
         this.turn = PlayerColor.WHITE;
     }
@@ -44,18 +40,23 @@ export class ChessBoardModel{
         pieceOnFromSquare.beenMoved = true;
         fromSquare.setPiece(undefined);
         toSquare.setPiece(pieceOnFromSquare);
-        this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
         if(this.isKingInCheck(pieceColor)) this.chessBoard = boardCopy;
-        else this.changeTurn();
+        else{
+            this.changeTurn();
+            this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
+        } 
 
         return true;
     }
     public checkmate(pieceColor:PlayerColor){
         const search = this.searchBoardForPiece(PieceType.KING,pieceColor);
+        if(!search) return false;
         const king = search.piece as KingModel;
         const kingPos = search.pos;
-        if(!king || !kingPos) return false;
+        const kingSquare = this.getSquareByPos(kingPos);
         if(!king.kingInCheck(this,kingPos)) return false;
+        if(kingSquare && king.getPossibleMoves(this,kingSquare,pieceColor).size !== 0) return false;
+        //return true;
     }
     public validMove(startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor){
         const pieceMove = startSquare.getPiece();
@@ -179,16 +180,17 @@ export class ChessBoardModel{
         return false;
     }
     public isKingInCheck(kingColor:PlayerColor): boolean {
-        const kingLocation = this.searchBoardForPiece(PieceType.KING, kingColor)
+        const kingLocation = this.searchBoardForPiece(PieceType.KING, kingColor);
+        if(!kingLocation) return false;
         const kingPos = kingLocation.pos;
-        if(!kingPos) return false;
+        //if(!kingPos) return false;
 
         const king = kingLocation.piece as KingModel;
         if(!king) return false;
 
         return king.kingInCheck(this,kingPos);
     }
-    public searchBoardForPiece(pieceType:PieceType,pieceColor:PlayerColor):{pos:string | undefined, piece:PieceModel | undefined}{
+    public searchBoardForPiece(pieceType:PieceType,pieceColor:PlayerColor):{pos:string , piece:PieceModel} | null{
         for(let row of this.chessBoard){
             for(let square of row){
                 const piece = square.getPiece();
@@ -198,7 +200,7 @@ export class ChessBoardModel{
                    ) return {pos: square.getPos(), piece: piece};
             }
         }
-        return {pos:undefined, piece:undefined};
+        return null;//{pos:undefined, piece:undefined};
     }
     public searchBoardFromPos(ignorePiece:PieceModel,startPos:string, directions:Object, pieceType:PieceType, callback:Function){
         const board = this.getChessBoard();
@@ -218,6 +220,7 @@ export class ChessBoardModel{
     public findPiece(board: Array<Array<SquareModel>>,ignorePiece:PieceModel,i:number,j:number,direction:{dx:number,dy:number}, pieceType:PieceType){
         i += direction.dy;
         j += direction.dx;
+       // const posVisited = new Set<string>;
         if(ChessBoardModel.withinBoard(i,j)){
             const currentPiece = board[i][j].getPiece();
             if(currentPiece && currentPiece.getColor() !== ignorePiece.getColor()){
@@ -321,13 +324,13 @@ export class ChessBoardModel{
                 
                 if(i===0 || i===1){
                     chessBoard[i].push(
-                        new SquareModel(color,pos,this.blackPieces[k])
+                        new SquareModel(color,pos,blackPieces[k])
                     );
                     k++;
                 }
                 else if(i===6 || i===7){
                     chessBoard[i].push(
-                        new SquareModel(color,pos,this.whitePieces[n])
+                        new SquareModel(color,pos,whitePieces[n])
                     );
                     n++;
                 }

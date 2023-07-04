@@ -22,7 +22,7 @@ export class KingModel extends PieceModel{
             return this.getPossibleMoves(boardModel,startSquare,playerColor).has(pos); 
         }
     
-    private getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
+    public getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const king = square.getPiece();
         const board = boardModel.getChessBoard();
         this.possibleMoves.clear();
@@ -41,7 +41,9 @@ export class KingModel extends PieceModel{
         for(const [,value] of Object.entries(kingDirections)){
             this.checkSquare(board,i,j,value.dx,value.dy,playerColor);
         }
-        
+        this.possibleMoves.forEach(element=>{
+            if(this.kingInCheck(boardModel,element)) this.possibleMoves.delete(element); 
+        });
         console.log(this.possibleMoves)
 
         return this.possibleMoves;
