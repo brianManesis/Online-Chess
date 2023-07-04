@@ -29,7 +29,7 @@ export class KnightModel extends PieceModel{
 
         let i = posArray.i;
         let j = posArray.j; 
-        for(const [key,value] of Object.entries(knightDirections)){
+        for(const [,value] of Object.entries(knightDirections)){
             this.checkSquare(board,i,j,value.dx,value.dy,playerColor);
         }
         console.log(this.possibleMoves)

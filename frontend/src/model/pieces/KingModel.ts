@@ -42,11 +42,6 @@ export class KingModel extends PieceModel{
             this.checkSquare(board,i,j,value.dx,value.dy,playerColor);
         }
         
-        this.possibleMoves.forEach(element=>{
-            if(this.kingInCheck(boardModel,element)){
-                this.possibleMoves.delete(element);
-            }
-        });
         console.log(this.possibleMoves)
 
         return this.possibleMoves;

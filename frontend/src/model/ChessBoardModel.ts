@@ -19,8 +19,7 @@ export class ChessBoardModel{
     public constructor(){
         this.whitePieces = whitePieces;
         this.blackPieces = blackPieces;
-        this.chessBoard = [[],[],[],[],[],[],[],[]];
-        this.initBoard();
+        this.chessBoard = this.initBoard();
         this.turn = PlayerColor.WHITE;
     }
 
@@ -41,11 +40,14 @@ export class ChessBoardModel{
         if(this.enPassant(fromSquare,toSquare)) return true;
         if(!this.validMove(fromSquare,toSquare,pieceColor)) return false;
 
+        const boardCopy = this.cloneBoard();
         pieceOnFromSquare.beenMoved = true;
         fromSquare.setPiece(undefined);
         toSquare.setPiece(pieceOnFromSquare);
         this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
-        this.changeTurn();
+        if(this.isKingInCheck(pieceColor)) this.chessBoard = boardCopy;
+        else this.changeTurn();
+
         return true;
     }
     public checkmate(pieceColor:PlayerColor){
@@ -126,6 +128,7 @@ export class ChessBoardModel{
         return true;
     }
     private enPassant(startSquare:SquareModel, endSquare:SquareModel){
+        const boardCopy = this.cloneBoard();
         const board = this.chessBoard;
         const pawn = startSquare.getPiece();
         const startSquarePos = this.posToArrayPos(startSquare.getPos());
@@ -161,6 +164,7 @@ export class ChessBoardModel{
             pieceLeftTakes.setPiece(pawn);
             this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
             this.changeTurn();
+            if(this.isKingInCheck(pawn.getColor())) this.chessBoard = boardCopy;
             return true;
         }
         if(pieceLastMoved === pieceRight && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceRightTakes){
@@ -169,6 +173,7 @@ export class ChessBoardModel{
             pieceRightTakes.setPiece(pawn);
             this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
             this.changeTurn();
+            if(this.isKingInCheck(pawn.getColor())) this.chessBoard = boardCopy;
             return true;
         }
         return false;
@@ -303,6 +308,7 @@ export class ChessBoardModel{
     }
 
     private initBoard(){
+        const chessBoard:Array<Array<SquareModel>> = [[],[],[],[],[],[],[],[]]
         let col = ROW_VALUES;
         let row = [...COL_VALUES].reverse();
         let k = 0, n = 0;
@@ -314,24 +320,25 @@ export class ChessBoardModel{
                 let color = (j+i+2) % 2 === 0? PlayerColor.WHITE:PlayerColor.BLACK;
                 
                 if(i===0 || i===1){
-                    this.chessBoard[i].push(
+                    chessBoard[i].push(
                         new SquareModel(color,pos,this.blackPieces[k])
                     );
                     k++;
                 }
                 else if(i===6 || i===7){
-                    this.chessBoard[i].push(
+                    chessBoard[i].push(
                         new SquareModel(color,pos,this.whitePieces[n])
                     );
                     n++;
                 }
                 else{
-                    this.chessBoard[i].push(
+                    chessBoard[i].push(
                         new SquareModel(color,pos)
                     );
                 }
             }
         }
+        return chessBoard;
     }
 
     public clone():ChessBoardModel{
@@ -349,6 +356,22 @@ export class ChessBoardModel{
         );
 
         clone.posMap = new Map(this.posMap);
+        return clone;
+    }
+    public cloneBoard():Array<Array<SquareModel>>{
+        let clone:Array<Array<SquareModel>>;
+        clone = this.chessBoard.map((row) =>
+            row.map((square) => {
+            const clonedSquare = new SquareModel(square.getColor(), square.getPos());
+            const piece = square.getPiece();
+            if (piece) {
+                const clonedPiece = Object.assign(Object.create(Object.getPrototypeOf(piece)), piece)
+                clonedSquare.setPiece(clonedPiece);
+            }
+            return clonedSquare;
+            })
+        );
+
         return clone;
     }
 }
