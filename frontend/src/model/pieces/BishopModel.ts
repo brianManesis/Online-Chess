@@ -14,7 +14,7 @@ export class BishopModel extends PieceModel{
             return this.getPossibleMoves(boardModel,startSquare,playerColor).has(pos);   
     }
 
-    private getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
+    public getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const rook = square.getPiece();
         const board = boardModel.getChessBoard();
         this.possibleMoves.clear();
@@ -29,10 +29,10 @@ export class BishopModel extends PieceModel{
 
         let i = posArray.i;
         let j = posArray.j; 
-        for(const [key,value] of Object.entries(bishopDirections)){
+        for(const [,value] of Object.entries(bishopDirections)){
             this.checkSquares(board,i,j,value.dx,value.dy,playerColor);
         }
-        console.log(this.possibleMoves)
+        //console.log(this.possibleMoves)
 
         return this.possibleMoves;
     }

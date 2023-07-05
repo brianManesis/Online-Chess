@@ -17,7 +17,8 @@ export abstract class PieceModel{
         this.possibleMoves = new Set<string>();
     }
     public abstract validMove(boardModel:ChessBoardModel, startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor):boolean;
-
+    public abstract getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>;
+    
     public getType(): PieceType{
         return this.type;
     }

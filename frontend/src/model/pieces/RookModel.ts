@@ -14,7 +14,7 @@ export class RookModel extends PieceModel{
             return this.getPossibleMoves(boardModel,startSquare,playerColor).has(pos);
     }
 
-    private getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
+    public getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const rook = square.getPiece();
         const board = boardModel.getChessBoard();
         this.possibleMoves.clear();
@@ -33,7 +33,7 @@ export class RookModel extends PieceModel{
         for(const [,value] of Object.entries(rookDirections)){
             this.checkSquares(board,i,j,value.dx,value.dy,playerColor);
         }
-        console.log(this.possibleMoves)
+        //console.log(this.possibleMoves)
 
         return this.possibleMoves;
     }

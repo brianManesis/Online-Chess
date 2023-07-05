@@ -13,7 +13,7 @@ export class PawnModel extends PieceModel{
         return this.getPossibleMoves(boardModel,startSquare,playerColor).has(pos);    
     }
 
-    private getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
+    public getPossibleMoves(boardModel:ChessBoardModel, square:SquareModel, playerColor:PlayerColor):Set<string>{
         const pawn = square.getPiece();
         this.possibleMoves.clear();
 

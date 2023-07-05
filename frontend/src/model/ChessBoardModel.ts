@@ -54,9 +54,26 @@ export class ChessBoardModel{
         const king = search.piece as KingModel;
         const kingPos = search.pos;
         const kingSquare = this.getSquareByPos(kingPos);
-        if(!king.kingInCheck(this,kingPos)) return false;
+        const check = king.kingInCheck(this,kingPos);
+        if(!check) return false;
         if(kingSquare && king.getPossibleMoves(this,kingSquare,pieceColor).size !== 0) return false;
-        //return true;
+        if(this.blockingMove(check,pieceColor)) return false;
+        return true;
+    }
+    public blockingMove(check:Set<string>,pieceColor: PlayerColor){
+        console.log(check);
+        for(let row of this.chessBoard){
+            for(let square of row){
+                let piece = square.getPiece();
+                if(piece && piece.getColor() === pieceColor){
+                    let possibleMoves = piece.getPossibleMoves(this,square,pieceColor);
+                    check.forEach(pos => {
+                        if(possibleMoves.has(pos)) return true;
+                    })
+                } 
+            }
+        }
+        return false;
     }
     public validMove(startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor){
         const pieceMove = startSquare.getPiece();
@@ -179,11 +196,10 @@ export class ChessBoardModel{
         }
         return false;
     }
-    public isKingInCheck(kingColor:PlayerColor): boolean {
+    public isKingInCheck(kingColor:PlayerColor):string | boolean {
         const kingLocation = this.searchBoardForPiece(PieceType.KING, kingColor);
         if(!kingLocation) return false;
         const kingPos = kingLocation.pos;
-        //if(!kingPos) return false;
 
         const king = kingLocation.piece as KingModel;
         if(!king) return false;
@@ -200,11 +216,12 @@ export class ChessBoardModel{
                    ) return {pos: square.getPos(), piece: piece};
             }
         }
-        return null;//{pos:undefined, piece:undefined};
+        return null;
     }
     public searchBoardFromPos(ignorePiece:PieceModel,startPos:string, directions:Object, pieceType:PieceType, callback:Function){
         const board = this.getChessBoard();
         const posArray = this.posToArrayPos(startPos);
+
         if(!posArray) return false;
 
         for(const [,value] of Object.entries(directions)){
@@ -212,20 +229,21 @@ export class ChessBoardModel{
             let j = posArray.j;
 
             let result = callback(board,ignorePiece,i,j,value,pieceType);
-            if(result) return true;
+            if(result) return result;
         }
 
         return false;
     }
     public findPiece(board: Array<Array<SquareModel>>,ignorePiece:PieceModel,i:number,j:number,direction:{dx:number,dy:number}, pieceType:PieceType){
+        const visitedPos = new Set();
         i += direction.dy;
         j += direction.dx;
-       // const posVisited = new Set<string>;
         if(ChessBoardModel.withinBoard(i,j)){
             const currentPiece = board[i][j].getPiece();
             if(currentPiece && currentPiece.getColor() !== ignorePiece.getColor()){
                 if( currentPiece.getType() === pieceType ){
-                        return true;
+                    visitedPos.add(board[i][j].getPos());
+                    return visitedPos;
                 }
                 else{
                     return false;
@@ -240,16 +258,17 @@ export class ChessBoardModel{
     }
     public findPieceInDirection(board: Array<Array<SquareModel>>,ignorePiece:PieceModel,i:number,j:number,direction:{dx:number,dy:number}, pieceType:PieceType){
         let flag = true;
+        const visitedPos = new Set();
         while(flag){
             i += direction.dy;
             j += direction.dx;
 
-
             if(ChessBoardModel.withinBoard(i,j)){
+                visitedPos.add(board[i][j].getPos());
                 const currentPiece = board[i][j].getPiece();
                 if(currentPiece && currentPiece.getColor() !== ignorePiece.getColor()){
                     if( currentPiece.getType() === pieceType){
-                            return true;
+                        return visitedPos;
                     }
                     else{
                         flag = false;

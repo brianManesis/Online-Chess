@@ -44,7 +44,7 @@ export class KingModel extends PieceModel{
         this.possibleMoves.forEach(element=>{
             if(this.kingInCheck(boardModel,element)) this.possibleMoves.delete(element); 
         });
-        console.log(this.possibleMoves)
+        //console.log(this.possibleMoves)
 
         return this.possibleMoves;
     }
