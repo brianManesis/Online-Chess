@@ -30,7 +30,7 @@ export class ChessBoardModel{
 
         let pieceColor = pieceOnFromSquare.getColor();
         if(pieceColor !== this.turn) return false;
-        if(this.checkmate(pieceColor)) return false;
+        if(this.checkmate(pieceColor) || this.stalemate(pieceColor)) return false;
         if(this.castleMove(fromSquare,toSquare)) return true;
         if(this.queeningMove(fromSquare,toSquare)) return true;
         if(this.enPassant(fromSquare,toSquare)) return true;
@@ -60,21 +60,19 @@ export class ChessBoardModel{
         if(this.blockingMove(check,pieceColor)) return false;
         return true;
     }
-    public blockingMove(check:Set<string>,pieceColor: PlayerColor){
-        console.log(check);
-        for(let row of this.chessBoard){
-            for(let square of row){
-                let piece = square.getPiece();
-                if(piece && piece.getColor() === pieceColor){
-                    let possibleMoves = piece.getPossibleMoves(this,square,pieceColor);
-                    check.forEach(pos => {
-                        if(possibleMoves.has(pos)) return true;
-                    })
-                } 
-            }
-        }
+    public stalemate(pieceColor:PlayerColor){
+        const search = this.searchBoardForPiece(PieceType.KING,pieceColor);
+        if(!search) return false;
+        const king = search.piece as KingModel;
+        const kingPos = search.pos;
+        const kingSquare = this.getSquareByPos(kingPos);
+        const check = king.kingInCheck(this,kingPos);
+        if(check) return false;
+        if(kingSquare && king.getPossibleMoves(this,kingSquare,pieceColor).size !== 0) return false;
+        if(this.noMoves(pieceColor)) return true;
         return false;
     }
+   
     public validMove(startSquare:SquareModel, endSquare:SquareModel, playerColor:PlayerColor){
         const pieceMove = startSquare.getPiece();
         if(pieceMove &&
@@ -205,6 +203,33 @@ export class ChessBoardModel{
         if(!king) return false;
 
         return king.kingInCheck(this,kingPos);
+    }
+    public blockingMove(check:Set<string>,pieceColor: PlayerColor){
+        console.log(check);
+        for(let row of this.chessBoard){
+            for(let square of row){
+                let piece = square.getPiece();
+                if(piece && piece.getColor() === pieceColor){
+                    let possibleMoves = piece.getPossibleMoves(this,square,pieceColor);
+                    check.forEach(pos => {
+                        if(possibleMoves.has(pos)) return true;
+                    })
+                } 
+            }
+        }
+        return false;
+    }
+    public noMoves(pieceColor:PlayerColor){
+        for(let row of this.chessBoard){
+            for(let square of row){
+                let piece = square.getPiece();
+                if(piece && piece.getColor() === pieceColor){
+                    let possibleMoves = piece.getPossibleMoves(this,square,pieceColor);
+                    if(possibleMoves.size > 0) return false; 
+                } 
+            }
+        }
+        return true;
     }
     public searchBoardForPiece(pieceType:PieceType,pieceColor:PlayerColor):{pos:string , piece:PieceModel} | null{
         for(let row of this.chessBoard){
