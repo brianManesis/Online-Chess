@@ -206,14 +206,15 @@ export class ChessBoardModel{
     }
     public blockingMove(check:Set<string>,pieceColor: PlayerColor){
         console.log(check);
+        const checkArray = Array.from(check);
         for(let row of this.chessBoard){
             for(let square of row){
                 let piece = square.getPiece();
                 if(piece && piece.getColor() === pieceColor){
                     let possibleMoves = piece.getPossibleMoves(this,square,pieceColor);
-                    check.forEach(pos => {
+                    for(let pos of checkArray){
                         if(possibleMoves.has(pos)) return true;
-                    })
+                    };
                 } 
             }
         }

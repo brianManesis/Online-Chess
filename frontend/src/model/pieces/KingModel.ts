@@ -69,6 +69,7 @@ export class KingModel extends PieceModel{
 
         return lookForQueen || lookForRook || lookForBishop || lookForKnight || lookForKing || lookForPawn;
     }
+
     private static kingDirections = {
             left:{
                 dx:-1,

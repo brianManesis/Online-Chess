@@ -36,7 +36,7 @@ export class KnightModel extends PieceModel{
 
         return this.possibleMoves;
     }
-
+    
     public static knightDirections = {
         one:{
             dx:-2,

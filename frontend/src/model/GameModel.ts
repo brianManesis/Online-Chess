@@ -22,7 +22,7 @@ export class GameModel{
     public getBoardModel(){
         return this.boardModel;
     }
-    public setBoardModel(boardModel:ChessBoardModel){
-        this.boardModel = boardModel;
-    }
+    // public setBoardModel(boardModel:ChessBoardModel){
+    //     this.boardModel = boardModel;
+    // }
 }

@@ -5,14 +5,29 @@ import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
 import { SquareModel } from '../../../../model/SquareModel';
+import  { socket }  from "../../../../services/socketConnection";
+//import io from 'socket.io-client';
 
 export default function Chessboard(props:{playerColor:PlayerColor}){
     const playerColor = props.playerColor;
-    const chessBoard:ChessBoardModel = new ChessBoardModel();
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [activePiece, setActivePiece] = useState< HTMLElement | null>(null);
-    const [boardModel,setBoardModel] = useState(chessBoard);
+    const [boardModel,setBoardModel] = useState(new ChessBoardModel());
     const [boardView, setBoardView] = useState([[],[],[],[],[],[],[],[]]);
+
+    useEffect(()=>{
+        const handleMove = (move:{start:string,end:string}) =>{
+            makeMove(move.start,move.end);
+        }
+        socket.on('connecton', (socket)=>{console.log(socket.id)});
+        socket.on('move', handleMove);
+
+        return () => {
+            socket.off('connecton');
+            socket.off('move', handleMove);
+          };
+     },[boardModel]);
+
         
     useEffect(()=>{
         makeChessBoard();
@@ -80,15 +95,20 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
 
 
             if(startSquare && endSquare){
-                const updatedBoardModel = boardModel.clone();
-                updatedBoardModel.move(
-                    startSquare.id,
-                    endSquare.id
-                );        
-                setBoardModel(updatedBoardModel);
+                makeMove(startSquare.id,endSquare.id);       
+                socket.emit("move", {start:startSquare.id,end:endSquare.id});
             }
             setActivePiece(null);
         }
+    }
+    function makeMove(start:string,end:string){
+        const updatedBoardModel = boardModel.clone();
+        updatedBoardModel.move(
+            start,
+            end
+        );        
+
+        setBoardModel(updatedBoardModel);
     }
     // function grabPiece(event: React.MouseEvent){
     //     const element = event.target as HTMLElement;
