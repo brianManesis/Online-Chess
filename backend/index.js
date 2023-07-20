@@ -1,29 +1,29 @@
 const express = require("express");
-const socketIo = require("socket.io");
-const http = require("http");
+const socket = require("./socket");
+const cors = require("cors");
+const dotenv = require('dotenv').config();
+const connectDB = require('./config/db');
+const router = require("./routes/index");
 
 const PORT = process.env.PORT || 5000;
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server,{ 
-    cors: {
-      origin: "http://localhost:3000"
-    }
-});
-io.on("connection",(socket)=>{
-  console.log("client connected: ",socket.id)
+const url = "http://localhost:3000";
+
+const initializer = async()=>{
+  await connectDB();
+  server();
+}
+const server = async() =>{
+  const app = express();
+  app.use(express.json());
+  app.use(cors(url));
+  app.use(router);
   
-  socket.on("move", move=>{
-    console.log(move);
-    socket.broadcast.emit('move', move);
+  const server = app.listen(PORT, err=> {
+    if(err) console.log(err)
+    console.log("Server running on Port ", PORT)
   });
   
-  socket.on("disconnect",(reason)=>{
-    console.log(reason)
-  })
-});
+  socket(server, app);
+}
 
-server.listen(PORT, err=> {
-  if(err) console.log(err)
-  console.log("Server running on Port ", PORT)
-});
+initializer();

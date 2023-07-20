@@ -6,7 +6,6 @@ import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
 import { SquareModel } from '../../../../model/SquareModel';
 import  { socket }  from "../../../../services/socketConnection";
-//import io from 'socket.io-client';
 
 export default function Chessboard(props:{playerColor:PlayerColor}){
     const playerColor = props.playerColor;
