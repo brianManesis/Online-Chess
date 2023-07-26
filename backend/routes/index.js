@@ -3,7 +3,7 @@ const gameCtrl = require("../controllers/gameCtrl");
 
 const router = express.Router();
 
-router.use('/game', require('./gameRoutes'));
-router.use('/auth', require('./authRoutes'));
+router.use('/api/game', require('./gameRoutes'));
+router.use('/api/auth', require('./authRoutes'));
 
 module.exports = router;

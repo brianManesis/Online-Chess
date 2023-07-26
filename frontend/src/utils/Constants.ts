@@ -6,6 +6,8 @@
 // import { QueenModel } from "../model/pieces/QueenModel";
 // import { RookModel } from "../model/pieces/RookModel";
 
+export const API_URL = "http://localhost:5000";
+
 export const ROW_VALUES = ['a','b','c','d','e','f','g','h'];
 
 export const COL_VALUES = [1,2,3,4,5,6,7,8];
