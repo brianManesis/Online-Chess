@@ -22,13 +22,14 @@ export class ChessBoardModel{
     public move(startPos:string, endPos:string){
         const fromSquare = this.getSquareByPos(startPos);
         const toSquare = this.getSquareByPos(endPos);
-
+        
         if(!fromSquare || !toSquare) return false;
 
         let pieceOnFromSquare: PieceModel | undefined = fromSquare.getPiece();
         if(!pieceOnFromSquare) return false;
 
         let pieceColor = pieceOnFromSquare.getColor();
+        
         if(pieceColor !== this.turn) return false;
         if(this.checkmate(pieceColor) || this.stalemate(pieceColor)) return false;
         if(this.castleMove(fromSquare,toSquare)) return true;

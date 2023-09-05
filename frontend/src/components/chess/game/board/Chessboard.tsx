@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
 import { SquareModel } from '../../../../model/SquareModel';
-import  { socket }  from "../../../../lib/webSocket/socketConnection";
 
-export default function Chessboard(props:{playerColor:PlayerColor}){
+export default function Chessboard(props:{socket:any,playerColor:PlayerColor}){
     const playerColor = props.playerColor;
+    const socket = props.socket;
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [activePiece, setActivePiece] = useState< HTMLElement | null>(null);
     const [boardModel,setBoardModel] = useState(new ChessBoardModel());
@@ -18,7 +18,7 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
         const handleMove = (move:{start:string,end:string}) =>{
             makeMove(move.start,move.end);
         }
-        socket.on('connecton', (socket)=>{console.log(socket.id)});
+        socket.on('connecton', (socket:any)=>{console.log(socket.id)});
         socket.on('move', handleMove);
 
         return () => {
@@ -69,8 +69,15 @@ export default function Chessboard(props:{playerColor:PlayerColor}){
     function selectPiece(event: React.MouseEvent){
         const element = event.target as HTMLElement;
         const currentBoard = boardViewRef.current;
-        if(element.classList.contains("piece") && currentBoard && !activePiece){
-            setActivePiece(element); 
+        if( element.classList.contains("piece") && 
+            currentBoard && 
+            !activePiece
+          )
+        {
+            let elementColor:PlayerColor = element.id.includes("White")?
+                PlayerColor.WHITE:PlayerColor.BLACK;
+            
+            if(elementColor === playerColor) setActivePiece(element); 
         }       
     }
     function movePiece(event: React.MouseEvent){

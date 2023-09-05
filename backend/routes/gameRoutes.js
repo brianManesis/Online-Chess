@@ -4,6 +4,7 @@ const {protect} = require('../middleware/authMiddleware');
 
 const game = express.Router();
 
-game.get('/create', gameCtrl.createGame);
+game.post('/create', gameCtrl.createGame);
+game.post('/join', gameCtrl.joinGame);
 
 module.exports = game;
