@@ -191,24 +191,24 @@ export class ChessBoardModel{
             startSquare.setPiece(undefined);
             pieceLeft.setPiece(undefined);
             pieceLeftTakes.setPiece(pawn);
-            this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
-            this.changeTurn();
             if(this.isKingInCheck(pawn.getColor())) {
                 this.chessBoard = boardCopy;
                 return false;
             }
+            this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+            this.changeTurn();
             return true;
         }
         if(pieceLastMoved === pieceRight && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceRightTakes){
             startSquare.setPiece(undefined);
             pieceRight.setPiece(undefined);
             pieceRightTakes.setPiece(pawn);
-            this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
-            this.changeTurn();
             if(this.isKingInCheck(pawn.getColor())) {
                 this.chessBoard = boardCopy;
                 return false;
             }
+            this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
+            this.changeTurn();
             return true;
         }
         return false;
