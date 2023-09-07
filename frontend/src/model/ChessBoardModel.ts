@@ -38,11 +38,11 @@ export class ChessBoardModel{
         if(!this.validMove(fromSquare,toSquare,pieceColor)) return false;
 
         const boardCopy = this.cloneBoard();
-        pieceOnFromSquare.beenMoved = true;
         fromSquare.setPiece(undefined);
         toSquare.setPiece(pieceOnFromSquare);
         if(this.isKingInCheck(pieceColor)) this.chessBoard = boardCopy;
         else{
+            pieceOnFromSquare.beenMoved = true;
             this.changeTurn();
             this.moveList.push({fromSquare:fromSquare.getPos(),toSquare:toSquare.getPos()});
         } 
@@ -90,7 +90,8 @@ export class ChessBoardModel{
         const endSquarePos = endSquare.getPos();
 
         if(!king || king.getType() !== PieceType.KING) return false;
-        if(king.beenMoved) return false;
+        const check = king.kingInCheck(this,startSquare.getPos());
+        if(king.beenMoved || check) return false;
         if( endSquarePos !== "c1" && endSquarePos !== "g1" &&
             endSquarePos !== "c8" && endSquarePos !== "g8") return false;
         const kingColor = king.getColor();
@@ -115,10 +116,16 @@ export class ChessBoardModel{
         if(!rook || rook.getType() !== PieceType.ROOK) return false;
         if(rook.beenMoved) return false;
 
+        const boardCopy = this.cloneBoard();
         rookSquare.setPiece(undefined);
         startSquare.setPiece(undefined);
         newRookSquare.setPiece(rook);
         endSquare.setPiece(king);
+
+        if(this.isKingInCheck(kingColor)){
+            this.chessBoard = boardCopy;
+            return false;
+        }
         king.beenMoved = true;
         rook.beenMoved = true;
         this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
@@ -137,9 +144,14 @@ export class ChessBoardModel{
         
         if(pawnColor===PlayerColor.WHITE && endSquareRow!==endRow) return false;
         else if(pawnColor===PlayerColor.BLACK && endSquareRow!==endRow) return false;
-
+        
+        const boardCopy = this.cloneBoard();
         startSquare.setPiece(undefined);
         endSquare.setPiece(new QueenModel(PieceType.QUEEN,pawnColor));
+        if(this.isKingInCheck(pawnColor)){
+            this.chessBoard = boardCopy;
+            return false;
+        }
         this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
         this.changeTurn();
         return true;
@@ -181,7 +193,10 @@ export class ChessBoardModel{
             pieceLeftTakes.setPiece(pawn);
             this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
             this.changeTurn();
-            if(this.isKingInCheck(pawn.getColor())) this.chessBoard = boardCopy;
+            if(this.isKingInCheck(pawn.getColor())) {
+                this.chessBoard = boardCopy;
+                return false;
+            }
             return true;
         }
         if(pieceLastMoved === pieceRight && pieceLastMovedDx===0 && pieceLastMovedDy===2 && endSquare === pieceRightTakes){
@@ -190,7 +205,10 @@ export class ChessBoardModel{
             pieceRightTakes.setPiece(pawn);
             this.moveList.push({fromSquare:startSquare.getPos(),toSquare:endSquare.getPos()});
             this.changeTurn();
-            if(this.isKingInCheck(pawn.getColor())) this.chessBoard = boardCopy;
+            if(this.isKingInCheck(pawn.getColor())) {
+                this.chessBoard = boardCopy;
+                return false;
+            }
             return true;
         }
         return false;
