@@ -6,7 +6,7 @@ import { BOARD_SIZE, PlayerColor } from '../../../../utils/Constants';
 import React from 'react';
 import { SquareModel } from '../../../../model/SquareModel';
 
-export default function Chessboard(props:{socket:any,playerColor:PlayerColor}){
+export default function Chessboard(props:{socket:any,playerColor:PlayerColor,opponent:string}){
     const playerColor = props.playerColor;
     const socket = props.socket;
     const boardViewRef = useRef<HTMLDivElement>(null);
@@ -18,11 +18,10 @@ export default function Chessboard(props:{socket:any,playerColor:PlayerColor}){
         const handleMove = (move:{start:string,end:string}) =>{
             makeMove(move.start,move.end);
         }
-        socket.on('connecton', (socket:any)=>{console.log(socket.id)});
+        //socket.on('connecton', (socket:any)=>{console.log(socket.id)});
         socket.on('move', handleMove);
-
         return () => {
-            socket.off('connecton');
+            //socket.off('connecton');
             socket.off('move', handleMove);
           };
      },[boardModel]);

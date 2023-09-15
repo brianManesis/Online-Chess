@@ -5,14 +5,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 import axios from "axios";
-import { socketConnection } from "../lib/webSocket/socketConnection";
+import { socket } from "../lib/webSocket/socketConnection";
+import UserHeader from "../components/common/UserHeader";
 
 export default function GameplayPage(){
 
     const navigate = useNavigate();
 
     const {user} = useSelector((state:any) => state.auth);
-    const [socket, setSocket] = useState(socketConnection);
+    const [opponent, setOpponent] = useState("");
     const [playerColor, setPlayerColor] = useState(PlayerColor.WHITE);
     const [loaded, setLoaded] = useState(false);
     useEffect(() =>{
@@ -22,51 +23,65 @@ export default function GameplayPage(){
     },[user,navigate]);
 
     useEffect(() => {
+        const createGame = (game:{host:boolean, hostColor:string, room:string})=>{
+            axios.post(API_URL+"/api/game/create",{host:game.room, hostColor:game.hostColor})
+            .then(res => {
+                socket.emit('createGame',{host:res.data.host, hostColor:res.data.hostColor});
+                setPlayerColor(res.data.hostColor);
+            })
+            .catch(err => {
+                navigate("/");
+            });
+        }
+        const joinGame = (host:string)=>{
+            axios.post(API_URL+"/api/game/join",{host})
+            .then(res => {
+                socket.emit('joinGame', res.data.host);
+                setPlayerColor(res.data.color);
+                socket.emit('playerJoined', user.username);
+            })
+            .catch(err => {
+                navigate("/");
+                alert("Lobby does not exist")
+            });
+        }
+        const leaveGame = ()=>{
+            socket.emit("leaveGame");
+            navigate("/");
+        }
+        const startGame = (opp:string)=>{
+            if(!opponent)setOpponent(opp);
+            setLoaded(true);
+        }
+
         const gameString = localStorage.getItem('game');
+
         if(!gameString) navigate('/');
         else{
             const game = JSON.parse(gameString);
-            if(game.host) createGame(game.room);
+
+            if(game.host) createGame(game);
             else joinGame(game.room);
         }
         socket.on('endGame', leaveGame);
-        socket.on("ready", ()=> setLoaded(true));
-
+        socket.on("startGame", startGame);
+        
         return ()=> {
-            socketConnection.emit("leaveGame");
+            socket.off('endGame');
+            socket.off('ready');
+            socket.emit("leaveGame");
         }
     }, []);
 
-    const createGame = (room:string)=>{
-        axios.post(API_URL+"/api/game/create",{room})
-        .then(res => {
-            socket.emit('joinGame',room);
-            setPlayerColor(PlayerColor.WHITE);
-        })
-        .catch(err => {
-            navigate("/");
-        });
-    }
-    const joinGame = (room:string)=>{
-        axios.post(API_URL+"/api/game/join",{room})
-        .then(res => {
-            socket.emit('joinGame',room);
-            socket.emit('startGame');
-            setPlayerColor(PlayerColor.BLACK);
-        })
-        .catch(err => {
-            navigate("/");
-            alert("Lobby does not exist")
-        });
-    }
-
-    const leaveGame = ()=>{
-        socket.emit("leaveGame");
-        navigate("/");
-    }
     return (
         <div id="gamePlayPage">
-            {loaded && <Chessboard socket={socket} playerColor={playerColor}></Chessboard>}
+            {loaded && 
+            <>
+                <UserHeader username={opponent} />
+                <Chessboard socket={socket} playerColor={playerColor} opponent={opponent}></Chessboard>
+                <UserHeader username={user.username} />
+            </>
+            }
         </div>
     );
 }

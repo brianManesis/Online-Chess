@@ -10,44 +10,61 @@ const socket = (server, app) => {
     });
 
     app.set("io", io);
+    app.set("playerMap", new Map());
     app.set("gameMap", new Map());
-    app.set("lobbys", new Set());
-
+    //app.set("lobbys", new Set());
+    // {
+    //   host,
+    //   opponent,
+    //   hostColor,
+    // }
     io.on("connection",(socket)=>{
       console.log("client connected: ",socket.id);
+      const playerMap = app.get("playerMap");
       const gameMap = app.get("gameMap");
-      const lobbys = app.get("lobbys");
 
-      socket.on("joinGame", room =>{
-        console.log(socket.id +" joined "+ room);
-        lobbys.add(room);
-        gameMap.set(socket.id,room);
-        socket.join(room);
+      socket.on("createGame", ({host, hostColor}) =>{
+        console.log(socket.id +" created "+ host);
+        if(!gameMap.get(host)){
+          gameMap.set(host, {host,hostColor});
+          playerMap.set(socket.id, host);
+          socket.join(host);
+        }
       });
 
-      socket.on("startGame", ()=>{
-        const room = gameMap.get(socket.id);
-        io.to(room).emit("ready");
+      socket.on("joinGame", host =>{
+        console.log(socket.id +" joined "+ host);
+        const game = gameMap.get(host);
+        if(game){
+          playerMap.set(socket.id,host);
+          socket.join(host);
+        }
+      });
+
+      socket.on("playerJoined", username=>{
+        const room = playerMap.get(socket.id);
+        socket.to(room).emit("startGame",username);
+        io.to(socket.id).emit("startGame", room)
       });
 
       socket.on("leaveGame", ()=>{
         console.log(socket.id +" left ");
-        const room = gameMap.get(socket.id);
-        gameMap.delete(socket.id);
-        lobbys.delete(room);
+        const room = playerMap.get(socket.id);
+        playerMap.delete(socket.id);
+        gameMap.delete(room);
         socket.leave(room);
         io.to(room).emit("endGame");
       });
 
       socket.on("move", move=>{
         console.log(move);
-        const room = gameMap.get(socket.id);
+        const room = playerMap.get(socket.id);
         io.to(room).emit('move', move);
       });
       
       socket.on("disconnect",(reason)=>{
         console.log(reason+" "+socket.id);
-        const room = gameMap.get(socket.id);
+        const room = playerMap.get(socket.id);
         io.to(room).emit('endGame');
       })
     });

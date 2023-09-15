@@ -25,10 +25,12 @@
     background-position: center;
     background-size: 8vh;
 }
-/* .piece:hover{
-    cursor: grab;
+.UserHeader{
+    background-color:lightgray;
+    text-align: left;
 }
-
-.piece:active {
-    cursor: grabbing;
-} */
+.Username{
+    padding:5px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size:larger;
+}

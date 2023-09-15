@@ -9,12 +9,12 @@ import Spinner from "../components/common/Spinner";
 export default function Register(){
     const [formData, setFormData] = useState({
         name:'',
-        email:'',
+        username:'',
         password:'',
         password2:''
     });
 
-    const {name, email, password, password2} = formData;
+    const {name, username, password, password2} = formData;
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -45,7 +45,7 @@ export default function Register(){
         }else{
             const userData = {
                 name,
-                email,
+                username,
                 password,
             }
 
@@ -80,12 +80,12 @@ export default function Register(){
 
                     <div className="form-group">
                         <input 
-                        type="email" 
+                        type="username" 
                         className="form-control" 
-                        id ="email"
-                        name="email" 
-                        value={email} 
-                        placeholder="Enter your email" 
+                        id ="username"
+                        name="username" 
+                        value={username} 
+                        placeholder="Enter your username" 
                         onChange={onChange}/>
                     </div>
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { socketConnection } from "../lib/webSocket/socketConnection";
+import { PlayerColor } from "../utils/Constants";
+
 export default function Dashboard() {
   const navigate = useNavigate();
 
@@ -15,7 +16,6 @@ export default function Dashboard() {
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [selectedColor, setSelectedColor] = useState("");
   const [username, setUsername] = useState("");
 
   const handleCreateGameClick = () => {
@@ -27,10 +27,10 @@ export default function Dashboard() {
   };
 
   const handleCreateGame = (color:string) => {
-    setSelectedColor(color);
     const game = {
         host:true,
-        room:user.email
+        hostColor:color,
+        room:user.username
     }
     if(localStorage){
       localStorage.setItem('game', JSON.stringify(game))
@@ -52,7 +52,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div>
+    <div className="Dash">
       <h1>Welcome {user ? user.name : 'Guest'}</h1>
       <button className="btn" onClick={handleCreateGameClick}>
         Create Game
@@ -72,21 +72,22 @@ export default function Dashboard() {
             </button>
             {showCreateModal && (
               <div>
-                <h2>Select Color</h2>
-                <button className="btn" onClick={() => handleCreateGame("black")}>Black</button>
-                <button className="btn" onClick={() => handleCreateGame("white")}>White</button>
+                <h1>Select Color</h1>
+                <button className="btn" onClick={() => handleCreateGame(PlayerColor.BLACK)}>Black</button>
+                <button className="btn" onClick={() => handleCreateGame(PlayerColor.WHITE)}>White</button>
               </div>
             )}
             {showJoinModal && (
               <div>
-                <h2>Join Game</h2>
+                <h1>Enter host username</h1>
                 <input
                   type="text"
+                  className="inp" 
                   placeholder="Enter Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
-                <button onClick={handleJoinGame}>Join</button>
+                <button className="btn" onClick={handleJoinGame}>Join</button>
               </div>
             )}
           </div>

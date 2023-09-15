@@ -7,15 +7,15 @@ const User = require('../models/userModel');
 // @route   POST /auth/users
 // @access  Public
 const registerUser = asyncHandler(async(req, res) =>{
-    const { name, email, password } = req.body
+    const { name, username, password } = req.body
 
-  if (!name || !email || !password) {
+  if (!name || !username || !password) {
     res.status(400)
     throw new Error('Please add all fields')
   }
 
   // Check if user exists
-  const userExists = await User.findOne({ email })
+  const userExists = await User.findOne({ username })
 
   if (userExists) {
     res.status(400)
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async(req, res) =>{
   // Create user
   const user = await User.create({
     name,
-    email,
+    username,
     password: hashedPassword,
   })
 
@@ -37,7 +37,7 @@ const registerUser = asyncHandler(async(req, res) =>{
     res.status(201).json({
       _id: user.id,
       name: user.name,
-      email: user.email,
+      username: user.username,
       token: generateToken(user._id)
     });
   } else {
@@ -50,15 +50,15 @@ const registerUser = asyncHandler(async(req, res) =>{
 // @route   POST /api/users/login
 // @access  Public
 const loginUser = asyncHandler(async(req, res) =>{
-    const {email, password} = req.body;
+    const {username, password} = req.body;
 
-    const user = await User.findOne({email});
+    const user = await User.findOne({username});
 
     if(user && (await bcrypt.compare(password,user.password))){
         res.json({
             id: user.id,
             name: user.name,
-            email: user.email,
+            username: user.username,
             token: generateToken(user._id)
         });
     }else{

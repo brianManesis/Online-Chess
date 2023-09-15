@@ -15,9 +15,11 @@ export default function Header(){
     }
     return (
         <header className ='header'>
-            <div className = 'logo'>
-                <Link to = '/'>Chess</Link>
-            </div>
+            <Link className="logo" to = '/'>
+                <h1 className="logo-text">Chess</h1>
+                <img className="logo-img" alt="" src={'/assets/images/BlackRook.png'}  />
+            </Link>
+
             <ul>
                 {user ? (
                     <li>
