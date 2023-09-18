@@ -12,12 +12,7 @@ const socket = (server, app) => {
     app.set("io", io);
     app.set("playerMap", new Map());
     app.set("gameMap", new Map());
-    //app.set("lobbys", new Set());
-    // {
-    //   host,
-    //   opponent,
-    //   hostColor,
-    // }
+  
     io.on("connection",(socket)=>{
       console.log("client connected: ",socket.id);
       const playerMap = app.get("playerMap");
@@ -26,7 +21,7 @@ const socket = (server, app) => {
       socket.on("createGame", ({host, hostColor}) =>{
         console.log(socket.id +" created "+ host);
         if(!gameMap.get(host)){
-          gameMap.set(host, {host,hostColor});
+          gameMap.set(host, {host,hostColor, opponent:false});
           playerMap.set(socket.id, host);
           socket.join(host);
         }
@@ -36,6 +31,7 @@ const socket = (server, app) => {
         console.log(socket.id +" joined "+ host);
         const game = gameMap.get(host);
         if(game){
+          game.opponent = true;
           playerMap.set(socket.id,host);
           socket.join(host);
         }

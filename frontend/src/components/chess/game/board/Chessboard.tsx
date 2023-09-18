@@ -18,10 +18,8 @@ export default function Chessboard(props:{socket:any,playerColor:PlayerColor,opp
         const handleMove = (move:{start:string,end:string}) =>{
             makeMove(move.start,move.end);
         }
-        //socket.on('connecton', (socket:any)=>{console.log(socket.id)});
         socket.on('move', handleMove);
         return () => {
-            //socket.off('connecton');
             socket.off('move', handleMove);
           };
      },[boardModel]);
@@ -115,64 +113,7 @@ export default function Chessboard(props:{socket:any,playerColor:PlayerColor,opp
 
         setBoardModel(updatedBoardModel);
     }
-    // function grabPiece(event: React.MouseEvent){
-    //     const element = event.target as HTMLElement;
-    //     const currentBoard = boardViewRef.current;
-    //     setGrabPiecePos(element.parentElement?.id+"");
-    //     console.log(element.parentElement?.id);
-    //     if(element.classList.contains("piece") && currentBoard){
-    //         const BOARD_VIEW_HEIGHT = boardViewRef.current.clientHeight;
-    //         const BOARD_VIEW_WIDTH = boardViewRef.current.clientWidth;
-    //         const x = event.clientX-(BOARD_VIEW_WIDTH/16);
-    //         const y = event.clientY-(BOARD_VIEW_HEIGHT/16);
-    //         element.style.position = "absolute";
-    //         element.style.left = `${x}px`;
-    //         element.style.top = `${y}px`;
-    //         setActivePiece(element);
-    //     }
-    // }
     
-    // function movePiece(event: React.MouseEvent){
-    //     if(activePiece && boardViewRef.current){
-    //         const BOARD_VIEW_HEIGHT = boardViewRef.current.clientHeight;
-    //         const BOARD_VIEW_WIDTH = boardViewRef.current.clientHeight;
-    //         const minX = boardViewRef.current.offsetLeft;
-    //         const minY = boardViewRef.current.offsetTop;
-    //         const maxX = boardViewRef.current.offsetLeft + ((8/9)*BOARD_VIEW_WIDTH);
-    //         const maxY = boardViewRef.current.offsetTop + ((8/9)*BOARD_VIEW_HEIGHT);
-
-    //         const x = event.clientX-(BOARD_VIEW_WIDTH/16);
-    //         const y = event.clientY-(BOARD_VIEW_HEIGHT/16);
-
-    //         if (x < minX) {
-    //             activePiece.style.left = `${minX}px`;
-    //         }
-    //         else if (x > maxX) {
-    //             activePiece.style.left = `${maxX}px`;
-    //         }
-    //         else {
-    //             activePiece.style.left = `${x}px`;
-    //         }
-    
-    //         if (y < minY) {
-    //             activePiece.style.top = `${minY}px`;
-    //         }
-    //         else if (y > maxY) {
-    //             activePiece.style.top = `${maxY}px`;
-    //         }
-    //         else {
-    //             activePiece.style.top = `${y}px`;
-    //         }
-    //     }
-    // }
-    
-    // function dropPiece(event: React.MouseEvent){
-    //     const element = event.target as HTMLElement;
-    //     console.log(event);
-    //     if(activePiece && boardViewRef.current){
-    //         setActivePiece(null);
-    //     }
-    // }
     return(
         <div id = "chessboard"
         onClick={event=>handleClick(event)}

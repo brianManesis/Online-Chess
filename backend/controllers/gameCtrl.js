@@ -12,7 +12,8 @@ const joinGame = (req, res) =>{
     const games = req.app.get("gameMap");
     const { host, opponent } = req.body;
     const game = games.get(host);
-    if(game){
+    
+    if(game && !game.opponent){
       const color = game.hostColor == "White"? "Black":"White";
       res.json({host, opponent, color});
     }
